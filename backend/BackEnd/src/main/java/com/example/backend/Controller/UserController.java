@@ -8,18 +8,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping
+@RequestMapping("/users")
 @CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
     @Autowired
     private UserService userService;
 
+    @GetMapping
     public List<User> getAll() {
         return userService.getAll();
     }
 
     @GetMapping("/{id}")
-    public User getById(@PathVariable String id) {
+    public User getById(@PathVariable Long id) {
         return userService.getById(id).orElse(null);
     }
 
@@ -29,12 +30,12 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public User update(@PathVariable String id, @RequestBody User user) {
+    public User update(@PathVariable Long id, @RequestBody User user) {
         return userService.update(id, user);
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable String id) {
+    public String delete(@PathVariable Long id) {
         userService.deleteById(id);
         return "DELETE ID: " + id;
     }
