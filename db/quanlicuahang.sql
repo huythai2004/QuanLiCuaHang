@@ -1,148 +1,162 @@
-use quanlicuahang;
--- 1) Database
+-- Tạo database
+DROP DATABASE IF EXISTS quanlicuahang;
+CREATE DATABASE quanlicuahang
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE quanlicuahang;
 
--- 2) USERS & ROLES
+-- 1) ROLES
 CREATE TABLE roles (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  code VARCHAR(50) NOT NULL UNIQUE,     -- e.g. ADMIN, STAFF
+  code VARCHAR(50) NOT NULL UNIQUE, -- ADMIN, CUSTOMER, STAFF
   name VARCHAR(100) NOT NULL
 );
+-- Roles
+INSERT INTO roles (code, name)
+VALUES ('ADMIN', 'Administrator'), ('CUSTOMER', 'Customer'), ('STAFF', 'Staff');
 
+-- 2) USERS
 CREATE TABLE users (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(50) NOT NULL UNIQUE,
   email VARCHAR(120) NOT NULL UNIQUE,
-  password_hash VARCHAR(255) NOT NULL,  -- lưu BCrypt
+  phone VARCHAR(30),
+  password_hash VARCHAR(255) NOT NULL, -- Bcrypt
   enabled TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Users (password_hash: giả lập, bạn thay bằng Bcrypt thực tế)
+INSERT INTO users (username, email, phone, password_hash)
+VALUES 
+('admin', 'admin@shop.com', '0900000001', '27112004'),
+('staff1', 'staff1@shop.com', '0900000002', '27112004'),
+('thai', 'thaiphamhuy3@gmail.com', '0900000003', '27112004');
+
+-- 3) USER_ROLES
 CREATE TABLE user_roles (
   user_id BIGINT NOT NULL,
   role_id BIGINT NOT NULL,
   PRIMARY KEY (user_id, role_id),
-  CONSTRAINT fk_ur_user FOREIGN KEY (user_id) REFERENCES users(id),
-  CONSTRAINT fk_ur_role FOREIGN KEY (role_id) REFERENCES roles(id)
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
--- 3) CUSTOMERS & SUPPLIERS
+-- Gán role cho user
+INSERT INTO user_roles (user_id, role_id)
+VALUES 
+(1, 1), -- admin → ADMIN
+(2, 3), -- staff1 → STAFF
+(3, 2); -- john → CUSTOMER
+
+-- 4) CUSTOMERS (thông tin chi tiết khi user là khách hàng)
 CREATE TABLE customers (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  full_name VARCHAR(150) NOT NULL,
-  phone VARCHAR(30),
-  email VARCHAR(120),
-  note VARCHAR(255),
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  user_id BIGINT NOT NULL UNIQUE,
+  full_name VARCHAR(150),
+  address VARCHAR(255),
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE suppliers (
-  id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(150) NOT NULL,
-  phone VARCHAR(30),
-  email VARCHAR(120),
-  note VARCHAR(255)
-);
+-- Customers
+INSERT INTO customers (user_id, full_name, address)
+VALUES (3, 'John Doe', '123 Nguyễn Trãi, Hà Nội');
 
--- 4) CATEGORIES
+-- 5) CATEGORIES
 CREATE TABLE categories (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(150) NOT NULL,
-  slug VARCHAR(180) NOT NULL UNIQUE,
+  slug VARCHAR(150) NOT NULL UNIQUE,
   parent_id BIGINT,
-  CONSTRAINT fk_cat_parent FOREIGN KEY (parent_id) REFERENCES categories(id)
+  FOREIGN KEY (parent_id) REFERENCES categories(id)
 );
+-- Categories
+INSERT INTO categories (name, slug) VALUES 
+('Quần áo nam', 'quan-ao-nam'),
+('Quần áo nữ', 'quan-ao-nu'),
+('Giày', 'giay'),
+('Đồng hồ', 'dong-ho');
 
--- 5) PRODUCTS
+-- 6) PRODUCTS
 CREATE TABLE products (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  sku VARCHAR(64) NOT NULL UNIQUE,
+  sku VARCHAR(64) NOT NULL UNIQUE,     -- mã sản phẩm
   name VARCHAR(200) NOT NULL,
   description TEXT,
   category_id BIGINT,
   price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-  cost DECIMAL(12,2) NOT NULL DEFAULT 0.00,
   stock_qty INT NOT NULL DEFAULT 0,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_prod_cat FOREIGN KEY (category_id) REFERENCES categories(id)
+  FOREIGN KEY (category_id) REFERENCES categories(id)
 );
+-- Products
+INSERT INTO products (sku, name, description, category_id, price, stock_qty)
+VALUES 
+('SKU-TSHIRT-01', 'Áo thun nam basic', 'Áo cotton thoáng mát', 1, 200000, 50),
+('SKU-DRESS-01', 'Đầm nữ công sở', 'Chất liệu vải cao cấp', 2, 350000, 30),
+('SKU-SHOE-01', 'Giày sneaker nam', 'Sneaker trắng hot trend', 3, 500000, 20),
+('SKU-WATCH-01', 'Đồng hồ nam dây da', 'Phong cách lịch lãm', 4, 1500000, 10);
 
-CREATE INDEX idx_products_name ON products(name);
-CREATE INDEX idx_products_category ON products(category_id);
-
--- 6) PURCHASE ORDERS (nhập hàng)
-CREATE TABLE purchase_orders (
+-- 7) PRODUCT_IMAGES (mỗi sản phẩm có thể có nhiều hình ảnh)
+CREATE TABLE product_images (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  supplier_id BIGINT NOT NULL,
-  ordered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  status VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- PENDING|RECEIVED|CANCELLED
-  total_cost DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-  CONSTRAINT fk_po_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
-);
-
-CREATE TABLE purchase_order_items (
-  id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  purchase_order_id BIGINT NOT NULL,
   product_id BIGINT NOT NULL,
-  qty INT NOT NULL,
-  unit_cost DECIMAL(12,2) NOT NULL,
-  CONSTRAINT fk_poi_po FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(id),
-  CONSTRAINT fk_poi_product FOREIGN KEY (product_id) REFERENCES products(id)
+  image_url VARCHAR(255) NOT NULL,
+  FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- 7) ORDERS (bán) & ITEMS
+-- Product Images
+INSERT INTO product_images (product_id, image_url) VALUES
+(1, '/images/products/tshirt1.jpg'),
+(2, '/images/products/dress1.jpg'),
+(3, '/images/products/shoe1.jpg'),
+(4, '/images/products/watch1.jpg');
+
+-- 8) ORDERS (hóa đơn/đơn hàng)
 CREATE TABLE orders (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  customer_id BIGINT,
-  ordered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  status VARCHAR(30) NOT NULL DEFAULT 'NEW',   -- NEW|PAID|CANCELLED|SHIPPED
-  subtotal DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-  discount DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-  tax DECIMAL(14,2) NOT NULL DEFAULT 0.00,
+  customer_id BIGINT NOT NULL,
+  order_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(30) NOT NULL DEFAULT 'NEW', -- NEW|PAID|SHIPPED|CANCELLED
   total DECIMAL(14,2) NOT NULL DEFAULT 0.00,
-  CONSTRAINT fk_order_customer FOREIGN KEY (customer_id) REFERENCES customers(id)
+  shipping_address VARCHAR(255),
+  FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
 
+-- Orders
+INSERT INTO orders (customer_id, status, total, shipping_address)
+VALUES (1, 'NEW', 900000, '123 Nguyễn Trãi, Hà Nội');
+
+-- 9) ORDER_ITEMS
 CREATE TABLE order_items (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   order_id BIGINT NOT NULL,
   product_id BIGINT NOT NULL,
-  qty INT NOT NULL,
+  quantity INT NOT NULL,  -- đổi tên ở đây
   unit_price DECIMAL(12,2) NOT NULL,
-  line_total DECIMAL(14,2) AS (qty * unit_price) STORED,
-  CONSTRAINT fk_oi_order FOREIGN KEY (order_id) REFERENCES orders(id),
-  CONSTRAINT fk_oi_product FOREIGN KEY (product_id) REFERENCES products(id)
+  line_total DECIMAL(14,2) GENERATED ALWAYS AS (quantity * unit_price) STORED,
+  FOREIGN KEY (order_id) REFERENCES orders(id),
+  FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- 8) PAYMENTS
+-- Order Items
+INSERT INTO order_items (order_id, product_id, quantity, unit_price)
+VALUES 
+(1, 1, 2, 200000), -- 2 áo thun nam
+(1, 3, 1, 500000); -- 1 đôi giày sneaker
+
+-- 10) PAYMENTS
 CREATE TABLE payments (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   order_id BIGINT NOT NULL,
-  method VARCHAR(30) NOT NULL,   -- CASH|CARD|TRANSFER|MOMO|ZALOPAY...
+  method VARCHAR(30) NOT NULL,  -- CASH|CARD|MOMO|ZALOPAY
   amount DECIMAL(14,2) NOT NULL,
   paid_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  ref_no VARCHAR(100),
-  CONSTRAINT fk_payment_order FOREIGN KEY (order_id) REFERENCES orders(id)
+  FOREIGN KEY (order_id) REFERENCES orders(id)
 );
-
--- 9) INVENTORY MOVEMENTS
-CREATE TABLE inventory_movements (
-  id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  product_id BIGINT NOT NULL,
-  type VARCHAR(30) NOT NULL,    -- IN|OUT|ADJUST
-  qty_change INT NOT NULL,      -- +n (nhập), -n (xuất)
-  reason VARCHAR(120),
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_im_product FOREIGN KEY (product_id) REFERENCES products(id)
-);
-
--- 10) REFRESH TOKENS (tùy chọn nếu dùng JWT refresh)
-CREATE TABLE refresh_tokens (
-  id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  user_id BIGINT NOT NULL,
-  token VARCHAR(255) NOT NULL UNIQUE,
-  expires_at DATETIME NOT NULL,
-  revoked TINYINT(1) NOT NULL DEFAULT 0,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_rt_user FOREIGN KEY (user_id) REFERENCES users(id)
-);
+-- Payment
+INSERT INTO payments (order_id, method, amount)
+VALUES (1, 'CASH', 900000);
+------------------------------------------------------
+-- 🔹 DỮ LIỆU MẪU (INSERT)
+------------------------------------------------------

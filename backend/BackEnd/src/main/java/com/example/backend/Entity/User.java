@@ -1,39 +1,53 @@
 package com.example.backend.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-import java.time.LocalDate;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
 public class User {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "username", unique = true, nullable = false, length = 50)
     private String username;
+    
+    @Column(name = "email", unique = true, nullable = false, length = 120)
     private String email;
-    private String password_hash;
-    private boolean enabled;
-    private LocalDate created_at;
+    
+    @Column(name = "phone", length = 30)
+    private String phone;
+    
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+    
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled;
+    
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     public User() {
     }
 
-    public User(String id, String username, String email, String password_hash, boolean enabled, LocalDate created_at) {
+    public User(Long id, String username, String email, String phone, String passwordHash, 
+                Boolean enabled, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.password_hash = password_hash;
+        this.phone = phone;
+        this.passwordHash = passwordHash;
         this.enabled = enabled;
-        this.created_at = created_at;
+        this.createdAt = createdAt;
     }
 
-    public String getId() {
+    // Getters and Setters
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -53,27 +67,35 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword_hash() {
-        return password_hash;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setPassword_hash(String password_hash) {
-        this.password_hash = password_hash;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public boolean isEnabled() {
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public Boolean getEnabled() {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 
-    public LocalDate getCreated_at() {
-        return created_at;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreated_at(LocalDate created_at) {
-        this.created_at = created_at;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
