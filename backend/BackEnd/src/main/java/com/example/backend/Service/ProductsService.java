@@ -21,7 +21,7 @@ public class ProductsService {
         return repository.findAll();
     }
 
-    public Optional<Products> findById(Integer id) {
+    public Optional<Products> findById(Long id) {
         return repository.findById(id);
     }
 
@@ -29,7 +29,7 @@ public class ProductsService {
         return repository.save(products);
     }
 
-    public void deleteById(Integer id) {
+    public void deleteById(Long id) {
         repository.deleteById(id);
     }
 }
