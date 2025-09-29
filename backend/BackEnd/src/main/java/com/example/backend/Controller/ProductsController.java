@@ -11,37 +11,47 @@ import java.util.List;
 @RequestMapping("/products")
 @CrossOrigin(origins = "http://localhost:3000")
 public class ProductsController {
-    private final ProductsService prooductsService;
     private final ProductsService productsService;
 
-    public ProductsController(ProductsService service, ProductsService productsService) {
-        this.prooductsService = service;
+    public ProductsController(ProductsService productsService) {
         this.productsService = productsService;
     }
 
     @GetMapping
     public List<Products> getAll() {
-        return prooductsService.getAll();
+        return productsService.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Products> getById(@PathVariable Integer id) {
-        return prooductsService.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Products> getById(@PathVariable Long id) {
+        return productsService.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<Products> create(@RequestBody Products products) {
-        Products saveProducts = prooductsService.save(products);
+        Products saveProducts = productsService.save(products);
         return ResponseEntity.ok().body(saveProducts);
     }
 
-    //TODO: hoàn thành task thêm data. Sửa lại database
     @PutMapping("/{id}")
-    public ResponseEntity<Products> update(@PathVariable Integer id, @RequestBody Products products) {
-        return productsService.findById(id).map(p -> {
-
-            Products updateProducts = prooductsService.save(products);
+    public ResponseEntity<Products> update(@PathVariable Long id, @RequestBody Products products) {
+        return productsService.findById(id).map(existing -> {
+            existing.setSku(products.getSku());
+            existing.setName(products.getName());
+            existing.setDescription(products.getDescription());
+            existing.setCategoryId(products.getCategoryId());
+            existing.setPrice(products.getPrice());
+            existing.setStockQty(products.getStockQty());
+            existing.setIsActive(products.getIsActive());
+            existing.setCreatedAt(products.getCreatedAt());
+            Products updateProducts = productsService.save(existing);
             return ResponseEntity.ok(updateProducts);
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete (@PathVariable Long id) {
+        productsService.deleteById(id);
+        return  "Product deleted " + id;
     }
 }
