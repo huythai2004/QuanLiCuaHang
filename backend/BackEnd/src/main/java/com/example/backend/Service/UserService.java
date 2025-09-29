@@ -17,7 +17,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> getById(String id) {
+    public Optional<User> getById(Long id) {
         return userRepository.findById(id);
     }
 
@@ -25,16 +25,16 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void deleteById (String id) {
+    public void deleteById (Long id) {
         userRepository.deleteById(id);
     }
 
-    public User update (String id, User user) {
+    public User update (Long id, User user) {
         return  userRepository.findById(id).map(u -> {
             u.setUsername(user.getUsername());
-            u.setPassword_hash(user.getPassword_hash());
+            u.setPasswordHash(user.getPasswordHash());
             u.setEmail(user.getEmail());
-            u.setEnabled(user.isEnabled());
+            u.setEnabled(user.getEnabled());
             return userRepository.save(u);
         }).orElse(null);
     }
