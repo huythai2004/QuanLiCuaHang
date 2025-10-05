@@ -1,6 +1,7 @@
 package com.example.backend.Entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "product_images")
@@ -14,6 +15,11 @@ public class ProductImages {
     
     @Column(name = "image_url", nullable = false, length = 255)
     private String imageUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Products product;
 
     public ProductImages() {
     }
@@ -46,6 +52,14 @@ public class ProductImages {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Products getProduct() {
+        return product;
+    }
+
+    public void setProduct(Products product) {
+        this.product = product;
     }
 }
 

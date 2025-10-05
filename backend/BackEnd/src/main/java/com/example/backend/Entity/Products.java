@@ -3,6 +3,7 @@ package com.example.backend.Entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -17,7 +18,7 @@ public class Products {
     @Column(name = "name", nullable = false, length = 200)
     private String name;
     
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT", length = 1000)
     private String description;
     
     @Column(name = "category_id")
@@ -34,6 +35,9 @@ public class Products {
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ProductImages> images;
 
     public Products() {
     }
@@ -122,5 +126,13 @@ public class Products {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<ProductImages> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ProductImages> images) {
+        this.images = images;
     }
 }
