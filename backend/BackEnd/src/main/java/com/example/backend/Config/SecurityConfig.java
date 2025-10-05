@@ -19,7 +19,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/products/**", "/users/**").permitAll()
+                .requestMatchers("/products/**", "/users/**", "/categories/**", "/product-images/**").permitAll()
                 .anyRequest().permitAll()
             );
         return http.build();
