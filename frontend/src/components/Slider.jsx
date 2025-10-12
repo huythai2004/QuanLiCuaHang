@@ -14,7 +14,7 @@ export default function Slider() {
   const slickRef = useRef(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
 
-  // Preload images trước
+  // Preload images first
   useEffect(() => {
     const imagePromises = [slide01, slide02, slide03].map((src) => {
       return new Promise((resolve) => {
@@ -36,12 +36,12 @@ export default function Slider() {
 
     const $slider = $(slickRef.current);
 
-    // Cleanup trước khi khởi tạo lại
+    // Cleanup before restart
     if ($slider.hasClass("slick-initialized")) {
       $slider.slick("unslick");
     }
 
-    // Đợi một chút để đảm bảo DOM đã render
+    // waiting to confirm DOM is Rendered
     setTimeout(() => {
       $slider.slick({
         slidesToShow: 1,
@@ -71,7 +71,7 @@ export default function Slider() {
         speed: 800,
       });
 
-      // Animation khi slide thay đổi
+      // Animation when slide changed
       $slider.on("setPosition", function () {
         const currentSlide = $(this).find(".slick-current");
         $(".layer-slick1").removeClass("animated").addClass("visible-false");
@@ -85,7 +85,7 @@ export default function Slider() {
         });
       });
 
-      // Trigger animation cho slide đầu tiên
+      // Trigger animation for first slide
       $slider.slick("setPosition");
 
       // Debug: Log background images
@@ -96,7 +96,7 @@ export default function Slider() {
       });
     }, 100);
 
-    // Cleanup khi unmount
+    // Cleanup when unmount
     return () => {
       if ($slider.hasClass("slick-initialized")) {
         $slider.slick("unslick");
