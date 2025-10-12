@@ -14,7 +14,7 @@ public class Products {
     
     @Column(name = "sku", unique = true, nullable = false, length = 64)
     private String sku;
-    
+
     @Column(name = "name", nullable = false, length = 200)
     private String name;
     
@@ -36,7 +36,7 @@ public class Products {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProductImages> images;
 
     public Products() {
