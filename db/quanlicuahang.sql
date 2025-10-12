@@ -18,6 +18,7 @@ VALUES ('ADMIN', 'Administrator'), ('CUSTOMER', 'Customer'), ('STAFF', 'Staff');
 CREATE TABLE users (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(50) NOT NULL UNIQUE,
+  full_name VARCHAR(150),
   email VARCHAR(120) NOT NULL UNIQUE,
   phone VARCHAR(30),
   password_hash VARCHAR(255) NOT NULL,
@@ -26,11 +27,11 @@ CREATE TABLE users (
 ) ENGINE=InnoDB;
 
 -- Mẫu: thay bằng bcrypt thực tế khi deploy
-INSERT INTO users (username, email, phone, password_hash)
+INSERT INTO users (username, full_name, email, phone, password_hash)
 VALUES 
-('admin', 'admin@shop.com', '0900000001', '27112004'),
-('staff1', 'staff1@shop.com', '0900000002', '27112004'),
-('thai', 'thaiphamhuy3@gmail.com', '0900000003', '27112004');
+('admin', 'Admin User', 'admin@shop.com', '0900000001', '27112004'),
+('staff1', 'Staff One', 'staff1@shop.com', '0900000002', '27112004'),
+('thai', 'Thai Pham', 'thaiphamhuy3@gmail.com', '0900000003', '27112004');
 
 -- 3) USER_ROLES
 CREATE TABLE user_roles (
@@ -100,10 +101,10 @@ CREATE TABLE products (
 
 INSERT INTO products (sku, name, description, category_id, price, stock_qty)
 VALUES 
-('SKU-TSHIRT-01', 'Áo thun nam basic', 'Áo cotton thoáng mát', 1, 200000, 50),
-('SKU-DRESS-01', 'Đầm nữ công sở', 'Chất liệu vải cao cấp', 2, 350000, 30),
-('SKU-SHOE-01', 'Giày sneaker nam', 'Sneaker trắng hot trend', 3, 500000, 20),
-('SKU-WATCH-01', 'Đồng hồ nam dây da', 'Phong cách lịch lãm', 4, 1500000, 10);
+('SKU-TSHIRT-01', 'Áo thun nam basic', 'Áo cotton thoáng mát', 1, 2000, 50),
+('SKU-DRESS-01', 'Đầm nữ công sở', 'Chất liệu vải cao cấp', 2, 350, 30),
+('SKU-SHOE-01', 'Giày sneaker nam', 'Sneaker trắng hot trend', 3, 5000, 20),
+('SKU-WATCH-01', 'Đồng hồ nam dây da', 'Phong cách lịch lãm', 4, 1500, 10);
 
 -- 7) PRODUCT_IMAGES
 CREATE TABLE product_images (
