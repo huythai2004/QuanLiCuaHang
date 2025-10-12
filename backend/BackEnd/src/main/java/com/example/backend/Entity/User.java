@@ -13,6 +13,9 @@ public class User {
     @Column(name = "username", unique = true, nullable = false, length = 50)
     private String username;
     
+    @Column(name = "full_name", length = 150)
+    private String fullName;
+    
     @Column(name = "email", unique = true, nullable = false, length = 120)
     private String email;
     
@@ -31,10 +34,11 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String username, String email, String phone, String passwordHash, 
+    public User(Long id, String username, String fullName, String email, String phone, String passwordHash, 
                 Boolean enabled, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
+        this.fullName = fullName;
         this.email = email;
         this.phone = phone;
         this.passwordHash = passwordHash;
@@ -57,6 +61,14 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getEmail() {
