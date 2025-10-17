@@ -30,31 +30,30 @@ public class ProductImagesController {
         return ResponseEntity.ok(images);
     }
 
+    // Upload single image
     @PostMapping("/upload/{productId}")
-    public ResponseEntity<Map<String, Object>> uploadImage(
-            @PathVariable Long productId,
-            @RequestParam("file") MultipartFile file) {
-        
+    public ResponseEntity<Map<String, Object>> uploadImage(@PathVariable Long productId, @RequestParam("file") MultipartFile file) {
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             // Upload to Cloudinary
             String imageUrl = cloudinaryService.uploadImage(file);
-            
+
             // Save to database
             ProductImages productImage = new ProductImages();
             productImage.setProductId(productId);
             productImage.setImageUrl(imageUrl);
-            
+
             ProductImages savedImage = productImagesService.save(productImage);
-            
+
             response.put("success", true);
             response.put("message", "Image uploaded successfully");
             response.put("imageUrl", imageUrl);
             response.put("imageId", savedImage.getId());
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalArgumentException e) {
             response.put("success", false);
             response.put("message", "Validation error: " + e.getMessage());
@@ -66,25 +65,24 @@ public class ProductImagesController {
         }
     }
 
+    // Upload multiple images
     @PostMapping("/upload-multiple/{productId}")
-    public ResponseEntity<Map<String, Object>> uploadMultipleImages(
-            @PathVariable Long productId,
-            @RequestParam("files") MultipartFile[] files) {
-        
+    public ResponseEntity<Map<String, Object>> uploadMultipleImages(@PathVariable Long productId, @RequestParam("files") MultipartFile[] files) {
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             int successCount = 0;
             int failCount = 0;
-            
+
             for (MultipartFile file : files) {
                 try {
                     String imageUrl = cloudinaryService.uploadImage(file);
-                    
+
                     ProductImages productImage = new ProductImages();
                     productImage.setProductId(productId);
                     productImage.setImageUrl(imageUrl);
-                    
+
                     productImagesService.save(productImage);
                     successCount++;
                 } catch (IllegalArgumentException e) {
@@ -92,14 +90,14 @@ public class ProductImagesController {
                     // Log the error but continue with other files
                 }
             }
-            
+
             response.put("success", true);
             response.put("message", String.format("Upload completed: %d success, %d failed", successCount, failCount));
             response.put("successCount", successCount);
             response.put("failCount", failCount);
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Failed to upload images: " + e.getMessage());
@@ -109,44 +107,45 @@ public class ProductImagesController {
 
     /**
      * Upload image from URL to Cloudinary
+     *
      * @param productId Product ID
-     * @param imageUrl Image URL from web
+     * @param imageUrl  Image URL from web
      * @return Response with uploaded image details
      */
+
+    // Upload image from URL
     @PostMapping("/upload-from-url/{productId}")
-    public ResponseEntity<Map<String, Object>> uploadImageFromUrl(
-            @PathVariable Long productId,
-            @RequestBody Map<String, String> requestBody) {
-        
+    public ResponseEntity<Map<String, Object>> uploadImageFromUrl(@PathVariable Long productId, @RequestBody Map<String, String> requestBody) {
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             String imageUrl = requestBody.get("imageUrl");
-            
+
             if (imageUrl == null || imageUrl.trim().isEmpty()) {
                 response.put("success", false);
                 response.put("message", "Image URL is required");
                 return ResponseEntity.badRequest().body(response);
             }
-            
+
             // Download and upload to Cloudinary
             String cloudinaryUrl = cloudinaryService.uploadImageFromUrl(imageUrl);
-            
+
             // Save to database
             ProductImages productImage = new ProductImages();
             productImage.setProductId(productId);
             productImage.setImageUrl(cloudinaryUrl);
-            
+
             ProductImages savedImage = productImagesService.save(productImage);
-            
+
             response.put("success", true);
             response.put("message", "Image uploaded successfully from URL");
             response.put("imageUrl", cloudinaryUrl);
             response.put("imageId", savedImage.getId());
             response.put("originalUrl", imageUrl);
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalArgumentException e) {
             response.put("success", false);
             response.put("message", "Validation error: " + e.getMessage());
@@ -160,31 +159,31 @@ public class ProductImagesController {
 
     /**
      * Upload multiple images from URLs to Cloudinary
-     * @param productId Product ID
+     * @param productId   Product ID
      * @param requestBody List of image URLs
      * @return Response with upload results
      */
+
+    //Upload multiple images from URLs
     @PostMapping("/upload-multiple-from-urls/{productId}")
-    public ResponseEntity<Map<String, Object>> uploadMultipleImagesFromUrls(
-            @PathVariable Long productId,
-            @RequestBody Map<String, List<String>> requestBody) {
-        
+    public ResponseEntity<Map<String, Object>> uploadMultipleImagesFromUrls(@PathVariable Long productId, @RequestBody Map<String, List<String>> requestBody) {
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             List<String> imageUrls = requestBody.get("imageUrls");
-            
+
             if (imageUrls == null || imageUrls.isEmpty()) {
                 response.put("success", false);
                 response.put("message", "Image URLs list is required");
                 return ResponseEntity.badRequest().body(response);
             }
-            
+
             int successCount = 0;
             int failCount = 0;
             List<Map<String, Object>> uploadedImages = new ArrayList<>();
             List<String> errors = new ArrayList<>();
-            
+
             for (String imageUrl : imageUrls) {
                 try {
                     if (imageUrl == null || imageUrl.trim().isEmpty()) {
@@ -192,42 +191,42 @@ public class ProductImagesController {
                         errors.add("Empty URL skipped");
                         continue;
                     }
-                    
+
                     // Download and upload to Cloudinary
                     String cloudinaryUrl = cloudinaryService.uploadImageFromUrl(imageUrl.trim());
-                    
+
                     // Save to database
                     ProductImages productImage = new ProductImages();
                     productImage.setProductId(productId);
                     productImage.setImageUrl(cloudinaryUrl);
-                    
+
                     ProductImages savedImage = productImagesService.save(productImage);
-                    
+
                     Map<String, Object> imageInfo = new HashMap<>();
                     imageInfo.put("imageId", savedImage.getId());
                     imageInfo.put("cloudinaryUrl", cloudinaryUrl);
                     imageInfo.put("originalUrl", imageUrl);
                     uploadedImages.add(imageInfo);
-                    
+
                     successCount++;
                 } catch (Exception e) {
                     failCount++;
                     errors.add(imageUrl + ": " + e.getMessage());
                 }
             }
-            
+
             response.put("success", true);
             response.put("message", String.format("Upload completed: %d success, %d failed", successCount, failCount));
             response.put("successCount", successCount);
             response.put("failCount", failCount);
             response.put("uploadedImages", uploadedImages);
-            
+
             if (!errors.isEmpty()) {
                 response.put("errors", errors);
             }
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Failed to upload images from URLs: " + e.getMessage());
@@ -237,35 +236,33 @@ public class ProductImagesController {
 
     /**
      * Update/Replace image with new URL
-     * @param imageId Image ID to update
+     *
+     * @param imageId     Image ID to update
      * @param requestBody New image URL
      * @return Response with updated image details
      */
     @PutMapping("/update-from-url/{imageId}")
-    public ResponseEntity<Map<String, Object>> updateImageFromUrl(
-            @PathVariable Long imageId,
-            @RequestBody Map<String, String> requestBody) {
-        
+    public ResponseEntity<Map<String, Object>> updateImageFromUrl(@PathVariable Long imageId, @RequestBody Map<String, String> requestBody) {
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             String newImageUrl = requestBody.get("imageUrl");
-            
+
             if (newImageUrl == null || newImageUrl.trim().isEmpty()) {
                 response.put("success", false);
                 response.put("message", "New image URL is required");
                 return ResponseEntity.badRequest().body(response);
             }
-            
+
             // Find existing image
-            ProductImages existingImage = productImagesService.findById(imageId)
-                .orElseThrow(() -> new RuntimeException("Image not found with ID: " + imageId));
-            
+            ProductImages existingImage = productImagesService.findById(imageId).orElseThrow(() -> new RuntimeException("Image not found with ID: " + imageId));
+
             String oldCloudinaryUrl = existingImage.getImageUrl();
-            
+
             // Upload new image to Cloudinary
             String newCloudinaryUrl = cloudinaryService.uploadImageFromUrl(newImageUrl);
-            
+
             // Delete old image from Cloudinary (optional, to save storage)
             try {
                 String oldPublicId = cloudinaryService.extractPublicId(oldCloudinaryUrl);
@@ -276,20 +273,20 @@ public class ProductImagesController {
                 // Log but don't fail the update if old image deletion fails
                 System.err.println("Warning: Failed to delete old image from Cloudinary: " + e.getMessage());
             }
-            
+
             // Update database with new URL
             existingImage.setImageUrl(newCloudinaryUrl);
             ProductImages updatedImage = productImagesService.save(existingImage);
-            
+
             response.put("success", true);
             response.put("message", "Image updated successfully");
             response.put("imageId", updatedImage.getId());
             response.put("oldImageUrl", oldCloudinaryUrl);
             response.put("newImageUrl", newCloudinaryUrl);
             response.put("originalUrl", newImageUrl);
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalArgumentException e) {
             response.put("success", false);
             response.put("message", "Validation error: " + e.getMessage());
@@ -308,25 +305,24 @@ public class ProductImagesController {
     @DeleteMapping("/{imageId}")
     public ResponseEntity<Map<String, Object>> deleteImage(@PathVariable Long imageId) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
-            ProductImages image = productImagesService.findById(imageId)
-                .orElseThrow(() -> new RuntimeException("Image not found"));
-            
+            ProductImages image = productImagesService.findById(imageId).orElseThrow(() -> new RuntimeException("Image not found"));
+
             // Delete from Cloudinary
             String publicId = cloudinaryService.extractPublicId(image.getImageUrl());
             if (publicId != null) {
                 cloudinaryService.deleteImage(publicId);
             }
-            
+
             // Delete from database
             productImagesService.deleteById(imageId);
-            
+
             response.put("success", true);
             response.put("message", "Image deleted successfully");
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Failed to delete image: " + e.getMessage());
