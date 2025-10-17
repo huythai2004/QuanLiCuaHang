@@ -1,6 +1,8 @@
 package com.example.backend.Entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,7 +34,9 @@ public class Products {
     
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
-    
+
+    //auto set current timestamp when created
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
