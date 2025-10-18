@@ -8,6 +8,7 @@ import MainContent from './components/MainContent';
 import Banner from './components/Pages/Banner';
 import Slider from './components/Slider';
 import Products from './components/Products';
+import ProductDetail from './components/Pages/ProductDetail';
 import About from './components/Pages/About';
 import Footer from './components/Pages/Footer';
 import Search from './components/Search';
@@ -50,6 +51,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/products" element={<ProductsPage />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<About />} />
               <Route path='/contact' element={<Contact />} />
               <Route path='/blog' element = {<Blog />} />
