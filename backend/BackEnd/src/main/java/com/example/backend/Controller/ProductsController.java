@@ -1,11 +1,15 @@
 package com.example.backend.Controller;
 
+import com.example.backend.DTO.CreateProductWithImagesRequest;
 import com.example.backend.Entity.Products;
 import com.example.backend.Service.ProductsService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/products")
@@ -28,10 +32,42 @@ public class ProductsController {
         return productsService.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Create new product (Not allow images)
+     * To add images, use endpoint /product-images/upload-multiple-from-urls/{productId}
+     */
     @PostMapping
     public ResponseEntity<Products> create(@RequestBody Products products) {
         Products saveProducts = productsService.save(products);
         return ResponseEntity.ok().body(saveProducts);
+    }
+
+    /**
+     * create new product with upload images from URLs to Cloudinary
+     * Body: {
+     *   "sku": "...",
+     *   "name": "...",
+     *   ...
+     *   "imageUrls": ["url1", "url2", ...]
+     * }
+     */
+    @PostMapping("/with-images")
+    public ResponseEntity<Map<String, Object>> createWithImages(@RequestBody CreateProductWithImagesRequest request) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Products savedProduct = productsService.createProductWithImages(request);
+            
+            response.put("success", true);
+            response.put("message", "Product created successfully with images");
+            response.put("product", savedProduct);
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Failed to create product: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @PutMapping("/{id}")
