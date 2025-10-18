@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import $ from "jquery";
+import { useNavigate } from 'react-router-dom';
 import Isotope from "isotope-layout";
 import "../css/main.css";
 import "../css/util.css";
@@ -21,6 +22,7 @@ export default function Products() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isotopeRef = useRef(null);
   const gridRef = useRef(null);
+  const navigate = useNavigate();
 
   // Fetch products from API
   useEffect(() => {
@@ -346,13 +348,16 @@ export default function Products() {
                 <div className="block2-txt flex-w flex-t p-t-14">
                   <div className="block2-txt-child1 flex-col-l">
                     <a 
-                      href="#" 
+                      href={`product/${product.id}`}
                       className="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6"
-                      onClick={(e) => e.preventDefault()}
-                      title={product.description}
+                      onClick={(e) => {e.preventDefault();
+                        navigate(`/product/${product.id}`);
+                      }}
+                      // title={product.description}
                     >
                       {product.name}
                     </a>
+                    
                     <span className="stext-105 cl3">
                       ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
                     </span>
