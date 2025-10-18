@@ -8,6 +8,7 @@ import "../fonts/iconic/css/material-design-iconic-font.min.css";
 import iconHeart1 from "../images/icons/icon-heart-01.png";
 import iconHeart2 from "../images/icons/icon-heart-02.png";
 import Filter from "./Filter";
+import QuickViewModal from "./QuickViewModal";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -16,6 +17,8 @@ export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const isotopeRef = useRef(null);
   const gridRef = useRef(null);
 
@@ -186,18 +189,41 @@ export default function Products() {
   };
 
   // Handle quick view
-  const handleQuickView = (product) => {
-    // Trigger modal hiển thị chi tiết sản phẩm
-    console.log("Quick view:", product);
-    // Bạn có thể thêm logic hiển thị modal ở đây
+  const handleQuickView = async (product) => {
+    try {
+      // Fetch product images from API
+      const response = await fetch(`http://localhost:8080/product-images/product/${product.id}`);
+      const images = await response.json();
+      
+      // Merge product data with images
+      const productWithImages = {
+        ...product,
+        images: images && images.length > 0 ? images : product.images || []
+      };
+      
+      setSelectedProduct(productWithImages);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      // Vẫn hiển thị modal với dữ liệu cơ bản nếu có lỗi
+      setSelectedProduct(product);
+      setIsModalOpen(true);
+    }
+  };
+
+  // Handle close modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
   };
 
   return (
-    <section className="bg0 p-t-23 p-b-140">
-      <div className="container">
-        <div className="p-b-10">
-          <h3 className="ltext-103 cl5">Product Overview</h3>
-        </div>
+    <>
+      <section className="bg0 p-t-23 p-b-140">
+        <div className="container">
+          <div className="p-b-10">
+            <h3 className="ltext-103 cl5">Product Overview</h3>
+          </div>
 
         <div className="flex-w flex-sb-m p-b-52">
           {/* Filter buttons */}
@@ -332,7 +358,7 @@ export default function Products() {
                     </span>
                     {product.stock_qty !== undefined && (
                       <span className="stext-107 cl6 p-t-5">
-                        {product.stock_qty > 0 ? `In stock: ${product.stock_qty}` : 'Out of stock'}
+                        {product.stock_qty > 0 ? `Số lượng sản phẩm: ${product.stock_qty}` : 'Out of stock'}
                       </span>
                     )}
                   </div>
@@ -364,6 +390,14 @@ export default function Products() {
         </div>
       </div>
     </section>
+
+    {/* Quick View Modal */}
+    <QuickViewModal 
+      product={selectedProduct}
+      isOpen={isModalOpen}
+      onClose={handleCloseModal}
+    />
+    </>
   );
 }
 
