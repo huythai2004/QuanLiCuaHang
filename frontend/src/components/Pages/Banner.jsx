@@ -26,7 +26,7 @@ export default function Banner() {
                                     </span>
                                 </div>
                                 <div className="block1-txt-child2 p-b-4 trans-05">
-                                    <div className="block1-link stext-101 cl0 trans-09">
+                                    <div Link to ="" className="block1-link stext-101 cl0 trans-09">
                                         Shop Now
                                     </div>
                                 </div>
