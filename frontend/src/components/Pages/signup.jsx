@@ -32,8 +32,8 @@ function Signup() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự!");
+    if (formData.password.length < 8) {
+      setError("Mật khẩu phải có ít nhất 8 ký tự!");
       return;
     }
 
@@ -116,10 +116,10 @@ function Signup() {
               type="password"
               name="password"
               className="form-control"
-              placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+              placeholder="Nhập mật khẩu (tối thiểu 8 ký tự)"
               value={formData.password}
               onChange={handleChange}
-              minLength="6"
+              minLength="8"
               required
             />
           </div>
