@@ -1,6 +1,8 @@
 package com.example.backend.Entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,26 +24,27 @@ public class User {
     @Column(name = "phone", length = 30)
     private String phone;
     
-    @Column(name = "password_hash", nullable = false, length = 255)
-    private String passwordHash;
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
     
     @Column(name = "enabled", nullable = false)
     private Boolean enabled;
-    
-    @Column(name = "created_at", nullable = false)
+    // auto set time
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     public User() {
     }
 
-    public User(Long id, String username, String fullName, String email, String phone, String passwordHash, 
+    public User(Long id, String username, String fullName, String email, String phone, String password, 
                 Boolean enabled, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
-        this.passwordHash = passwordHash;
+        this.password = password;
         this.enabled = enabled;
         this.createdAt = createdAt;
     }
@@ -87,12 +90,12 @@ public class User {
         this.phone = phone;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getpassword() {
+        return password;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setpassword(String password) {
+        this.password = password;
     }
 
     public Boolean getEnabled() {

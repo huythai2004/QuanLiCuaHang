@@ -275,7 +275,7 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
   -webkit-transition: height 0.3s, background-color 0.3s;
   -o-transition: height 0.3s, background-color 0.3s;
   -moz-transition: height 0.3s, background-color 0.3s;
-  transition: height 0.3s, background-color 0.3s;
+  transition: height 0.3s, background-color 0.3s ease, top 0.3s ease, box-shadow 0.3s ease;
 }
 
 .header-v2 .wrap-menu-desktop {
@@ -293,6 +293,11 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
   background-color: #fff;
 }
 
+.wrap-menu-desktop.scrolled {
+  top: 0;
+  background-color: #f8f6f8;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
 /*---------------------------------------------*/
 .limiter-menu-desktop {
