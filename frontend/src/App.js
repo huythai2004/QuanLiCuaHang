@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import NavBar from './components/Pages/NavBar';
+import { CartProvider } from './contexts/CartContext';
+import Header from'./components/Pages/Header';
 import Login from './components/Pages/Login';
 import Signup from './components/Pages/signup';
+import ResetPassword from './components/Pages/ResetPassword';
 import MainContent from './components/MainContent';
-import Banner from './components/Pages/Banner';
-import Slider from './components/Slider';
+import Banner from './components/Layout/Banner';
+import Slider from './components/Layout/Slider';
 import Products from './components/Products';
 import ProductDetail from './components/Pages/ProductDetail';
 import About from './components/Pages/About';
@@ -15,6 +17,8 @@ import Search from './components/Search';
 import Contact from './components/Pages/Contact';
 import Blog from './components/Pages/Blog';
 import BlogDetails from './components/Pages/BlogDetails';
+import Cart from './components/Cart/Cart';
+
 import './css/main.css';
 import './css/util.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -42,10 +46,11 @@ function App() {
 
   return (
     <AuthProvider>
-      <Router>
-        <div className="App">
-          <NavBar onSearchClick={() => setShowSearch(true)} />
-          <Search show={showSearch} onClose={() => setShowSearch(false)} />
+      <CartProvider>
+        <Router>
+          <div className="App">
+            <Header onSearchClick={() => setShowSearch(true)} />
+            <Search show={showSearch} onClose={() => setShowSearch(false)} />
           
           <main>
             <Routes>
@@ -58,12 +63,15 @@ function App() {
               <Route path='/blog-details' element = {<BlogDetails/>} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/resetpassword" element={<ResetPassword />} />
+              <Route path='/Cart' element={<Cart/>} />
             </Routes>
           </main>
 
           <Footer />
         </div>
       </Router>
+      </CartProvider>
     </AuthProvider>
   );
 }
