@@ -3,12 +3,16 @@ import $ from "jquery";
 import "../../css/main.css";
 import "../../css/util.css";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { useCart } from "../../contexts/CartContext";
 import iconHeart1 from "../../images/icons/icon-heart-01.png";
 import iconHeart2 from "../../images/icons/icon-heart-02.png";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const { addToCart } = useCart();
   const [products, setProducts] = useState(null);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +34,6 @@ export default function ProductDetail() {
     if (id) {
     fetchProductDetail();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchProductDetail = async () => {
@@ -77,8 +80,46 @@ export default function ProductDetail() {
 
   //Handle functions
   const handleAddToCart = () => {
+    // Check if user is logged in
+    if (!currentUser) {
+      if (window.confirm("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Chuyển đến trang đăng nhập?")) {
+        navigate("/login");
+      }
+      return;
+    }
+
+    // Validate size and color selection
+    if (!selectedSize) {
+      alert("Vui lòng chọn kích thước!");
+      return;
+    }
+    if (!selectedColor) {
+      alert("Vui lòng chọn màu sắc!");
+      return;
+    }
+
+    // Check stock
+    if (products.stockQty <= 0) {
+      alert("Sản phẩm đã hết hàng!");
+      return;
+    }
+
+    // Prepare product data
+    const productData = {
+      id: products.id,
+      name: products.name,
+      price: products.price,
+      primary_image: images?.[0]?.imageUrl || require('../../images/product-01.jpg'),
+      stock_qty: products.stockQty
+    };
+
+    // Add to cart
+    addToCart(productData, quantity, selectedSize, selectedColor);
+    
     if (window.swal) {
       window.swal(products.name, "đã được thêm vào giỏ hàng!", "success");
+    } else {
+      alert(`${products.name} đã được thêm vào giỏ hàng!`);
     }
   };
 
@@ -252,24 +293,24 @@ export default function ProductDetail() {
             </h4>
 
             {/* Product price */}
-            <span className="mtext-106 cl2" style={{ fontSize: "22px" }}>
-              $
+            <span className="mtext-106" style={{ fontSize: "22px", color: '#e65540' }}>
               {typeof products.price === "number"
-                ? products.price.toFixed(2)
+                ? products.price.toLocaleString('vi-VN')
                 : products.price}
+              <span style={{ fontSize: '0.85em' }}>đ</span>
             </span>
 
             {/* Stock status */}
-            {products.stock_qty !== undefined && (
+            {products.stockQty !== undefined && (
               <div className="p-t-10">
                 <span
                   className={`stext-102 ${
-                    products.stock_qty > 0 ? "cl3" : "cl10"
+                    products.stockQty > 0 ? "cl3" : "cl10"
                   }`}
                   style={{ fontSize: "13px" }}
                 >
-                  {products.stock_qty > 0
-                    ? `Số lượng có sẵn: ${products.stock_qty} sản phẩm`
+                  {products.stockQty > 0
+                    ? `Số lượng có sẵn: ${products.stockQty} sản phẩm`
                     : "Hết hàng"}
                 </span>
               </div>
@@ -374,7 +415,7 @@ export default function ProductDetail() {
                   <button
                     className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
                     onClick={handleAddToCart}
-                    disabled={products.stock_qty <= 0}
+                    disabled={products.stockQty <= 0}
                     style={{ fontSize: "14px" }}
                   >
                     Thêm vào giỏ
@@ -465,10 +506,10 @@ export default function ProductDetail() {
                         <span className="stext-102 cl6 size-206">{products.sku}</span>
                       </li>
                     )}
-                    {products.stock_qty !== undefined && (
+                    {products.stockQty !== undefined && (
                       <li className="flex-w flex-t p-b-7">
                         <span className="stext-102 cl3 size-205">Tồn kho</span>
-                        <span className="stext-102 cl6 size-206">{products.stock_qty} sản phẩm</span>
+                        <span className="stext-102 cl6 size-206">{products.stockQty} sản phẩm</span>
                       </li>
                     )}
                   </ul>
@@ -628,8 +669,9 @@ export default function ProductDetail() {
                               {product.name}
                             </a>
 
-                            <span className="stext-105 cl3" style={{ fontSize: '15px', fontWeight: '500' }}>
-                              ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
+                            <span className="stext-105" style={{ fontSize: '15px', fontWeight: '500', color: '#e65540' }}>
+                              {typeof product.price === 'number' ? product.price.toLocaleString('vi-VN') : product.price}
+                              <span style={{ fontSize: '0.85em' }}>đ</span>
                             </span>
                           </div>
 

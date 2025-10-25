@@ -21,13 +21,13 @@ CREATE TABLE users (
   full_name VARCHAR(150),
   email VARCHAR(120) NOT NULL UNIQUE,
   phone VARCHAR(30),
-  password_hash VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
   enabled TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 -- Mẫu: thay bằng bcrypt thực tế khi deploy
-INSERT INTO users (username, full_name, email, phone, password_hash)
+INSERT INTO users (username, full_name, email, phone, password)
 VALUES 
 ('admin', 'Admin User', 'admin@shop.com', '0900000001', '27112004'),
 ('staff1', 'Staff One', 'staff1@shop.com', '0900000002', '27112004'),
@@ -101,10 +101,10 @@ CREATE TABLE products (
 
 INSERT INTO products (sku, name, description, category_id, price, stock_qty)
 VALUES 
-('SKU-TSHIRT-01', 'Áo thun nam basic', 'Áo cotton thoáng mát', 1, 2000, 50),
-('SKU-DRESS-01', 'Đầm nữ công sở', 'Chất liệu vải cao cấp', 2, 350, 30),
-('SKU-SHOE-01', 'Giày sneaker nam', 'Sneaker trắng hot trend', 3, 5000, 20),
-('SKU-WATCH-01', 'Đồng hồ nam dây da', 'Phong cách lịch lãm', 4, 1500, 10);
+('SKU-TSHIRT-01', 'Áo thun nam basic', 'Áo cotton thoáng mát', 1, 200000, 50),
+('SKU-DRESS-01', 'Đầm nữ công sở', 'Chất liệu vải cao cấp', 2, 350000, 30),
+('SKU-SHOE-01', 'Giày sneaker nam', 'Sneaker trắng hot trend', 3, 500000, 20),
+('SKU-WATCH-01', 'Đồng hồ nam dây da', 'Phong cách lịch lãm', 4, 1500000, 10);
 
 -- 7) PRODUCT_IMAGES
 CREATE TABLE product_images (
@@ -174,6 +174,16 @@ CREATE TABLE payments (
 INSERT INTO payments (order_id, method, amount)
 VALUES (1, 'CASH', 900000);
 
+-- 11) Password_Reset_Token
+create table password_reset_token (
+	 id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  otp_code VARCHAR(6) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  is_used BOOLEAN DEFAULT FALSE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 -- Indexes hỗ trợ truy vấn (bổ sung ngoài UNIQUE/PK)
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_products_category_id ON products(category_id);
