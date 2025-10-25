@@ -52,7 +52,7 @@ export default function Blog() {
                         to="/blog-details"
                         className="ltext-108 cl2 hov-cl1 trans-04"
                       >
-                        8 Inspiring Ways to Wear Dresses in the Winter
+                        8 Cách phối đồ phù hợp với bạn
                       </Link>
                     </h4>
 

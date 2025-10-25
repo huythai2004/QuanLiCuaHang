@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 import '../css/main.css';
 import '../css/util.css';
 import $ from 'jquery';
 
 export default function QuickViewModal({ product, isOpen, onClose }) {
+  const { currentUser } = useAuth();
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
@@ -47,12 +53,41 @@ export default function QuickViewModal({ product, isOpen, onClose }) {
 
   // Handle add to cart
   const handleAddToCart = () => {
-    // TODO: Implement add to cart logic
-    if (window.swal) {
-      window.swal(product.name, "is added to cart!", "success");
-    } else {
-      alert(`${product.name} is added to cart!`);
+    // Check if user is logged in
+    if (!currentUser) {
+      if (window.confirm("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Chuyển đến trang đăng nhập?")) {
+        navigate("/login");
+      }
+      return;
     }
+
+    // Validate size and color selection (optional based on your needs)
+    if (!selectedSize) {
+      alert("Vui lòng chọn kích thước!");
+      return;
+    }
+    if (!selectedColor) {
+      alert("Vui lòng chọn màu sắc!");
+      return;
+    }
+
+    // Check stock
+    if (product.stock_qty <= 0) {
+      alert("Sản phẩm đã hết hàng!");
+      return;
+    }
+
+    // Add to cart
+    addToCart(product, quantity, selectedSize, selectedColor);
+    
+    if (window.swal) {
+      window.swal(product.name, "đã được thêm vào giỏ hàng!", "success");
+    } else {
+      alert(`${product.name} đã được thêm vào giỏ hàng!`);
+    }
+    
+    // Close modal after adding
+    onClose();
   };
 
   // Handle add to wishlist
@@ -140,8 +175,9 @@ export default function QuickViewModal({ product, isOpen, onClose }) {
                 </h4>
 
                 {/* Product Price */}
-                <span className="mtext-106 cl2" style={{ fontSize: '22px' }}>
-                  ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
+                <span className="mtext-106" style={{ fontSize: '22px', color: '#e65540' }}>
+                  {typeof product.price === 'number' ? product.price.toLocaleString('vi-VN') : product.price}
+                  <span style={{ fontSize: '0.85em' }}>đ</span>
                 </span>
 
                 {/* Stock Status */}
