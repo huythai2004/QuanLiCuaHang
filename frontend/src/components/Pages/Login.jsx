@@ -56,9 +56,9 @@ function Login() {
               }}
               required
             />
-            <small className="form-text text-muted">
+            {/* <small className="form-text text-muted">
               Bạn có thể đăng nhập bằng email hoặc số điện thoại
-            </small>
+            </small> */}
           </div>
 
           {/* Password */}
@@ -76,7 +76,8 @@ function Login() {
               required
             />
           </div>
-
+          
+          <Link to={"/resetpassword"} style={{padding:"20px", margin:"auto"}}>Quên mật khẩu?</Link>
           {/* Submit */}
           <button type="submit" className="btn btn-primary w-100 mb-3">
             Đăng nhập

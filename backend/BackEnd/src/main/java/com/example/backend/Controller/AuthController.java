@@ -20,51 +20,51 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    //Sign Up
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+        String password = request.getPassword();
+        String passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&_-])[A-Za-z\\d@$!%*?&_-]{8,}$";
+        if (!password.matches(passwordRegex)) {
+            return ResponseEntity.badRequest().body(new AuthResponse(false, "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!", null));
+        }
+
         try {
             // Validate input
             if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
-                return ResponseEntity.badRequest()
-                    .body(new AuthResponse(false, "Tên đăng nhập không được để trống!", null));
+                return ResponseEntity.badRequest().body(new AuthResponse(false, "Tên đăng nhập không được để trống!", null));
             }
 
             if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-                return ResponseEntity.badRequest()
-                    .body(new AuthResponse(false, "Email không được để trống!", null));
+                return ResponseEntity.badRequest().body(new AuthResponse(false, "Email không được để trống!", null));
             }
 
-            if (request.getPassword() == null || request.getPassword().length() < 6) {
-                return ResponseEntity.badRequest()
-                    .body(new AuthResponse(false, "Mật khẩu phải có ít nhất 6 ký tự!", null));
+            if (request.getPassword() == null || request.getPassword().matches(passwordRegex)) {
+                return ResponseEntity.badRequest().body(new AuthResponse(false, "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và kí tự đặc biệt!", null));
             }
 
             // Register user
             User user = userService.register(request);
             AuthResponse.UserDTO userDTO = new AuthResponse.UserDTO(user);
 
-            return ResponseEntity.ok(
-                new AuthResponse(true, "Đăng ký thành công!", userDTO)
-            );
+            return ResponseEntity.ok(new AuthResponse(true, "Đăng ký thành công!", userDTO));
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new AuthResponse(false, e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new AuthResponse(false, e.getMessage(), null));
         }
     }
 
+    // Sign In
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         try {
             // Validate input
             if (request.getEmailOrPhone() == null || request.getEmailOrPhone().trim().isEmpty()) {
-                return ResponseEntity.badRequest()
-                    .body(new AuthResponse(false, "Email/Số điện thoại không được để trống!", null));
+                return ResponseEntity.badRequest().body(new AuthResponse(false, "Email/Số điện thoại không được để trống!", null));
             }
 
             if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
-                return ResponseEntity.badRequest()
-                    .body(new AuthResponse(false, "Mật khẩu không được để trống!", null));
+                return ResponseEntity.badRequest().body(new AuthResponse(false, "Mật khẩu không được để trống!", null));
             }
 
             // Attempt login
@@ -74,27 +74,20 @@ public class AuthController {
                 User user = userOpt.get();
                 AuthResponse.UserDTO userDTO = new AuthResponse.UserDTO(user);
 
-                return ResponseEntity.ok(
-                    new AuthResponse(true, "Đăng nhập thành công!", userDTO)
-                );
+                return ResponseEntity.ok(new AuthResponse(true, "Đăng nhập thành công!", userDTO));
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new AuthResponse(false, 
-                        "Bạn đã điền sai email/số điện thoại hoặc mật khẩu, vui lòng nhập lại!", 
-                        null));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(false, "Bạn đã điền sai email/số điện thoại hoặc mật khẩu, vui lòng nhập lại!", null));
             }
 
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new AuthResponse(false, "Lỗi hệ thống: " + e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AuthResponse(false, "Lỗi hệ thống: " + e.getMessage(), null));
         }
     }
 
     @GetMapping("/check")
     public ResponseEntity<AuthResponse> checkAuth() {
-        return ResponseEntity.ok(
-            new AuthResponse(true, "Auth endpoint is working", null)
-        );
+        return ResponseEntity.ok(new AuthResponse(true, "Auth endpoint is working", null));
     }
 }
 

@@ -4,6 +4,7 @@ import com.example.backend.DTO.RegisterRequest;
 import com.example.backend.Entity.User;
 import com.example.backend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,10 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    public UserService(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public List<User> getAll() {
         return userRepository.findAll();
@@ -35,7 +40,7 @@ public class UserService {
         return  userRepository.findById(id).map(u -> {
             u.setUsername(user.getUsername());
             u.setFullName(user.getFullName());
-            u.setPasswordHash(user.getPasswordHash());
+            u.setpassword(user.getpassword());
             u.setEmail(user.getEmail());
             u.setPhone(user.getPhone());
             u.setEnabled(user.getEnabled());
@@ -45,6 +50,8 @@ public class UserService {
 
     // Register new user
     public User register(RegisterRequest request) throws Exception {
+        String encodePassword = passwordEncoder.encode(request.getPassword());
+
         // Check if username already exists
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new Exception("Tên đăng nhập đã tồn tại!");
@@ -67,7 +74,7 @@ public class UserService {
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setPasswordHash(request.getPassword());
+        user.setpassword(encodePassword); // Encoding password
         user.setEnabled(true);
         user.setCreatedAt(LocalDateTime.now());
 
@@ -87,10 +94,14 @@ public class UserService {
         }
 
         // Check if user exists and password matches
-        if (user.isPresent() && user.get().getPasswordHash().equals(password)) {
+        if (user.isPresent() && user.get().getpassword().equals(password)) {
             return user;
         }
-
+        // Compare password with password encoder
+        boolean isMatch = passwordEncoder.matches(password, user.get().getpassword());
+        if (isMatch) {
+            throw new RuntimeException("Sai mật khẩu! Vui lòng nhập lại.");
+        }
         return Optional.empty();
     }
 }
