@@ -3,12 +3,12 @@ import $ from "jquery";
 import "slick-carousel";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import "../css/main.css";
-import "../css/util.css";
+import "../../css/main.css";
+import "../../css/util.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import slide01 from "../images/slide-01.jpg";
-import slide02 from "../images/slide-02.jpg";
-import slide03 from "../images/slide-03.jpg";
+import slide01 from "../../images/slide-01.jpg";
+import slide02 from "../../images/slide-02.jpg";
+import slide03 from "../../images/slide-03.jpg";
 
 export default function Slider() {
   const slickRef = useRef(null);

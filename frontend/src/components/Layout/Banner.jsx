@@ -2,7 +2,6 @@ import React from "react";
 import "../../css/main.css";
 import "../../css/util.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-// Nếu ảnh nằm trong src/images, import như sau:
 import banner01 from "../../images/banner-01.jpg";
 import banner02 from "../../images/banner-02.jpg";
 import banner03 from "../../images/banner-03.jpg";

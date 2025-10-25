@@ -74,7 +74,10 @@ export default function BlogSidebar({ featuredProducts, categories, archives, ta
                   >
                     {product.name}
                   </a>
-                  <span className="stext-116 cl6 p-t-20">${product.price}</span>
+                  <span className="stext-116 p-t-20" style={{ color: '#e65540' }}>
+                    {typeof product.price === 'number' ? product.price.toLocaleString('vi-VN') : product.price}
+                    <span style={{ fontSize: '0.85em' }}>đ</span>
+                  </span>
                 </div>
               </li>
             ))}

@@ -19,12 +19,12 @@ export default function Filter({ onFilterChange }) {
   ];
 
   const priceRanges = [
-    { value: "all", label: "All" },
-    { value: "0-50", label: "$0.00 - $50.00" },
-    { value: "50-100", label: "$50.00 - $100.00" },
-    { value: "100-150", label: "$100.00 - $150.00" },
-    { value: "150-200", label: "$150.00 - $200.00" },
-    { value: "200+", label: "$200.00+" }
+    { value: "all", label: "Tất cả" },
+    { value: "0-1000000", label: "Dưới 1,000,000đ" },
+    { value: "1000000-5000000", label: "1,000,000đ - 5,000,000đ" },
+    { value: "5000000-10000000", label: "5,000,000đ - 10,000,000đ" },
+    { value: "10000000-20000000", label: "10,000,000đ - 20,000,000đ" },
+    { value: "20000000+", label: "Trên 20,000,000đ" }
   ];
 
   const colors = [

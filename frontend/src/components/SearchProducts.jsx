@@ -36,14 +36,6 @@ export default function SearchProducts() {
               Men
             </button>
 
-            {/* bag */}
-            <button
-              className="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5"
-              data-filter=".bag"
-            >
-              Bag
-            </button>
-
             {/* Shoes */}
             <button
               className="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5"
