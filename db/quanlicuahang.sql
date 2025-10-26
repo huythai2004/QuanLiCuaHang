@@ -165,6 +165,9 @@ CREATE TABLE payments (
   order_id BIGINT NOT NULL,
   method VARCHAR(30) NOT NULL,
   amount DECIMAL(14,2) NOT NULL,
+  transaction_no VARCHAR(50) NOT NULL,
+  bank_code VARCHAR(50),
+  status VARCHAR(20) DEFAULT 'PENDING',
   paid_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_payments_order
     FOREIGN KEY (order_id) REFERENCES orders(id)
