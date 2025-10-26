@@ -22,7 +22,8 @@ public class Order_Items {
     @Column(name = "unit_price", precision = 12, scale = 2, nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(name = "line_total", precision = 14, scale = 2)
+    // Generated column in database - read only
+    @Column(name = "line_total", precision = 14, scale = 2, insertable = false, updatable = false)
     private BigDecimal lineTotal;
 
     public Order_Items() {
