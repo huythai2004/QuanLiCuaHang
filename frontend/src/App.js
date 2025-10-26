@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
-import Header from'./components/Pages/Header';
+import Header from './components/Layout/Header';
 import Login from './components/Pages/Login';
 import Signup from './components/Pages/signup';
 import ResetPassword from './components/Pages/ResetPassword';
@@ -12,12 +12,17 @@ import Slider from './components/Layout/Slider';
 import Products from './components/Products';
 import ProductDetail from './components/Pages/ProductDetail';
 import About from './components/Pages/About';
-import Footer from './components/Pages/Footer';
+import Footer from './components/Layout/Footer';
 import Search from './components/Search';
 import Contact from './components/Pages/Contact';
 import Blog from './components/Pages/Blog';
 import BlogDetails from './components/Pages/BlogDetails';
 import Cart from './components/Cart/Cart';
+import Payment from './components/Cart/Payment';
+import UserOrders from './components/Pages/UserOrders';
+import OrderDetail from './components/Pages/OrderDetail';
+import UserProfile from './components/Pages/UserProfile';
+import AdminDashboard from './components/Pages/AdminDashboard';
 
 import './css/main.css';
 import './css/util.css';
@@ -65,6 +70,11 @@ function App() {
               <Route path="/signup" element={<Signup />} />
               <Route path="/resetpassword" element={<ResetPassword />} />
               <Route path='/Cart' element={<Cart/>} />
+              <Route path='/payment' element={<Payment/>} />
+              <Route path='/my-orders' element={<UserOrders/>} />
+              <Route path='/order-detail/:orderId' element={<OrderDetail/>} />
+              <Route path='/profile' element={<UserProfile/>} />
+              <Route path='/admin' element={<AdminDashboard/>} />
             </Routes>
           </main>
 
