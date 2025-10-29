@@ -98,5 +98,22 @@ public class OrderController {
             ));
         }
     }
+
+    // Cancel order (Delete/Cancel)
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<?> cancelOrder(@PathVariable Long orderId) {
+        try {
+            orderService.cancelOrder(orderId);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đơn hàng đã được hủy thành công"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
 }
 
