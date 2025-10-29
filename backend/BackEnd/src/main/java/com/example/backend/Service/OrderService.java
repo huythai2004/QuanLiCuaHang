@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,6 +69,26 @@ public class OrderService {
         return savedOrder;
     }
 
+    //Get order Total
+    public BigDecimal getOrderTotal(Long orderId) {
+        List<Order_Items> orderItems = orderItemsRepository.findByOrderId(orderId);
+
+        if(orderItems.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy sản phẩm trong đơn hàng ID: " + orderId);
+        }
+        //Fallback
+        return orderItems.stream()
+                .map(item -> {
+                    if(item.getLineTotal() != null) {
+                        return item.getLineTotal();
+                    } else {
+                        return item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                    }
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // Function Get order Detail
     public OrderDetailResponse getOrderDetail(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -148,6 +167,21 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
         order.setStatus(status);
+        orderRepository.save(order);
+    }
+
+    @Transactional
+    public void cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+        
+        // Chỉ cho phép hủy đơn hàng đang chờ thanh toán
+        if (!"PENDING".equals(order.getStatus())) {
+            throw new RuntimeException("Chỉ có thể hủy đơn hàng đang chờ thanh toán");
+        }
+        
+        // Cập nhật status thành CANCELLED
+        order.setStatus("CANCELLED");
         orderRepository.save(order);
     }
 }
