@@ -5,6 +5,7 @@ import "../../css/util.css";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useCart } from "../../contexts/CartContext";
+import { useWishlist } from "../../contexts/WishlistContext";
 import iconHeart1 from "../../images/icons/icon-heart-01.png";
 import iconHeart2 from "../../images/icons/icon-heart-02.png";
 
@@ -13,6 +14,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const [products, setProducts] = useState(null);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -124,11 +126,38 @@ export default function ProductDetail() {
   };
 
   const handleAddToWishlist = () => {
+    // Check if user is logged in
+    if (!currentUser) {
+      if (window.confirm("Bạn cần đăng nhập để thêm vào danh sách yêu thích. Chuyển đến trang đăng nhập?")) {
+        navigate("/login");
+      }
+      return;
+    }
+
+    // Prepare product data for wishlist
+    const productData = {
+      id: products.id,
+      name: products.name,
+      price: products.price,
+      primary_image: images?.[0]?.imageUrl || require('../../images/product-01.jpg'),
+      description: products.description,
+      stock_qty: products.stockQty
+    };
+
+    // Toggle wishlist
+    const isAdded = toggleWishlist(productData);
+    
+    // Show notification
     if (window.swal) {
-      window.swal(
-        products.name,
-        "đã được thêm vào danh sách yêu thích!",
-        "success"
+      if (isAdded) {
+        window.swal(products.name, "đã được thêm vào danh sách yêu thích!", "success");
+      } else {
+        window.swal(products.name, "đã được xóa khỏi danh sách yêu thích!", "info");
+      }
+    } else {
+      alert(isAdded 
+        ? `${products.name} đã được thêm vào danh sách yêu thích!` 
+        : `${products.name} đã được xóa khỏi danh sách yêu thích!`
       );
     }
   };
@@ -159,9 +188,28 @@ export default function ProductDetail() {
   };
 
   // Handle add to wishlist for related products
-  const handleAddToWishlistRelated = (productName) => {
+  const handleAddToWishlistRelated = (product, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check if user is logged in
+    if (!currentUser) {
+      if (window.confirm("Bạn cần đăng nhập để thêm vào danh sách yêu thích. Chuyển đến trang đăng nhập?")) {
+        navigate("/login");
+      }
+      return;
+    }
+
+    // Toggle wishlist
+    const isAdded = toggleWishlist(product);
+    
+    // Show notification
     if (window.swal) {
-      window.swal(productName, "đã được thêm vào yêu thích!", "success");
+      if (isAdded) {
+        window.swal(product.name, "đã được thêm vào yêu thích!", "success");
+      } else {
+        window.swal(product.name, "đã được xóa khỏi yêu thích!", "info");
+      }
     }
   };
 
@@ -502,7 +550,7 @@ export default function ProductDetail() {
                   <ul className="p-lr-28 p-lr-15-sm">
                     {products.sku && (
                       <li className="flex-w flex-t p-b-7">
-                        <span className="stext-102 cl3 size-205">Mã SP</span>
+                        <span className="stext-102 cl3 size-205">Mã Sản Phẩm</span>
                         <span className="stext-102 cl6 size-206">{products.sku}</span>
                       </li>
                     )}
@@ -678,11 +726,8 @@ export default function ProductDetail() {
                           <div className="block2-txt-child2 flex-r p-t-3" style={{ width: '20%' }}>
                             <a 
                               href="#"
-                              className="btn-addwish-b2 dis-block pos-relative"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handleAddToWishlistRelated(product.name);
-                              }}
+                              className={`btn-addwish-b2 dis-block pos-relative ${isInWishlist(product.id) ? 'js-addedwish-b2' : ''}`}
+                              onClick={(e) => handleAddToWishlistRelated(product, e)}
                               style={{ padding: 0 }}
                             >
                               <img 

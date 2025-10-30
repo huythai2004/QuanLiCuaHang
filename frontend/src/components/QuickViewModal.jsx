@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
 import '../css/main.css';
 import '../css/util.css';
 import $ from 'jquery';
@@ -9,6 +10,7 @@ import $ from 'jquery';
 export default function QuickViewModal({ product, isOpen, onClose }) {
   const { currentUser } = useAuth();
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -92,10 +94,29 @@ export default function QuickViewModal({ product, isOpen, onClose }) {
 
   // Handle add to wishlist
   const handleAddToWishlist = () => {
+    // Check if user is logged in
+    if (!currentUser) {
+      if (window.confirm("Bạn cần đăng nhập để thêm vào danh sách yêu thích. Chuyển đến trang đăng nhập?")) {
+        navigate("/login");
+      }
+      return;
+    }
+
+    // Toggle wishlist
+    const isAdded = toggleWishlist(product);
+    
+    // Show notification
     if (window.swal) {
-      window.swal(product.name, "is added to wishlist!", "success");
+      if (isAdded) {
+        window.swal(product.name, "đã được thêm vào danh sách yêu thích!", "success");
+      } else {
+        window.swal(product.name, "đã được xóa khỏi danh sách yêu thích!", "info");
+      }
     } else {
-      alert(`${product.name} is added to wishlist!`);
+      alert(isAdded 
+        ? `${product.name} đã được thêm vào danh sách yêu thích!` 
+        : `${product.name} đã được xóa khỏi danh sách yêu thích!`
+      );
     }
   };
 

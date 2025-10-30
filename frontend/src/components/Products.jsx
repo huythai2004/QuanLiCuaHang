@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import $ from "jquery";
 import { useNavigate } from "react-router-dom";
 import Isotope from "isotope-layout";
+import { useAuth } from "../contexts/AuthContext";
+import { useWishlist } from "../contexts/WishlistContext";
 import "../css/main.css";
 import "../css/util.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -12,6 +14,8 @@ import Filter from "./Filter";
 import QuickViewModal from "./QuickViewModal";
 
 export default function Products() {
+  const { currentUser } = useAuth();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeFilter, setActiveFilter] = useState("*");
@@ -183,12 +187,33 @@ export default function Products() {
   };
 
   // Handle add to wishlist
-  const handleAddToWishlist = (productName) => {
-    // Sử dụng sweetalert nếu có, hoặc alert thông thường
+  const handleAddToWishlist = (product, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check if user is logged in
+    if (!currentUser) {
+      if (window.confirm("Bạn cần đăng nhập để thêm vào danh sách yêu thích. Chuyển đến trang đăng nhập?")) {
+        navigate("/login");
+      }
+      return;
+    }
+
+    // Toggle wishlist
+    const isAdded = toggleWishlist(product);
+    
+    // Show notification
     if (window.swal) {
-      window.swal(productName, "is added to wishlist!", "success");
+      if (isAdded) {
+        window.swal(product.name, "đã được thêm vào danh sách yêu thích!", "success");
+      } else {
+        window.swal(product.name, "đã được xóa khỏi danh sách yêu thích!", "info");
+      }
     } else {
-      alert(`${productName} is added to wishlist!`);
+      alert(isAdded 
+        ? `${product.name} đã được thêm vào danh sách yêu thích!` 
+        : `${product.name} đã được xóa khỏi danh sách yêu thích!`
+      );
     }
   };
 
@@ -408,11 +433,8 @@ export default function Products() {
                     <div className="block2-txt-child2 flex-r p-t-3">
                       <a
                         href="#"
-                        className="btn-addwish-b2 dis-block pos-relative js-addwish-b2"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleAddToWishlist(product.name);
-                        }}
+                        className={`btn-addwish-b2 dis-block pos-relative js-addwish-b2 ${isInWishlist(product.id) ? 'js-addedwish-b2' : ''}`}
+                        onClick={(e) => handleAddToWishlist(product, e)}
                       >
                         <img
                           className="icon-heart1 dis-block trans-04"

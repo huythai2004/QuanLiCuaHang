@@ -1,11 +1,14 @@
 package com.example.backend.Service;
 
 import com.example.backend.DTO.RegisterRequest;
+import com.example.backend.Entity.Customers;
 import com.example.backend.Entity.User;
+import com.example.backend.Repository.CustomersRepository;
 import com.example.backend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +18,10 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private CustomersRepository customersRepository;
+    
     private final PasswordEncoder passwordEncoder;
 
     public UserService(PasswordEncoder passwordEncoder) {
@@ -38,6 +45,7 @@ public class UserService {
     }
 
     //Update User
+    @Transactional
     public User update(Long id, User user) {
         return userRepository.findById(id).map(u ->  {
             u.setUsername(user.getUsername());
@@ -46,11 +54,23 @@ public class UserService {
             u.setEmail(user.getEmail());
             u.setPhone(user.getPhone());
             u.setEnabled(user.getEnabled());
-            // Only update password if provided
+            
+            // Chỉ update password nếu không null và không empty
             if(user.getpassword() != null && !user.getpassword().isEmpty()) {
                 u.setpassword(passwordEncoder.encode(user.getpassword()));
             }
-            return userRepository.save(u);
+            
+            // Save User trước
+            User savedUser = userRepository.save(u);
+            
+            // Đồng bộ thông tin sang bảng Customer
+            customersRepository.findByUserId(id).ifPresent(customer -> {
+                customer.setFullName(user.getFullName());
+                customer.setAddress(user.getAddress());
+                customersRepository.save(customer);
+            });
+            
+            return savedUser;
         }).orElseThrow(()-> new RuntimeException("User not found"));
     }
 
@@ -80,6 +100,7 @@ public class UserService {
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
+        user.setAddress(""); // Initialize với empty string
         user.setpassword(encodePassword); // Encoding password
         user.setEnabled(true);
         user.setCreatedAt(LocalDateTime.now());
