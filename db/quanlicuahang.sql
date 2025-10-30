@@ -21,17 +21,18 @@ CREATE TABLE users (
   full_name VARCHAR(150),
   email VARCHAR(120) NOT NULL UNIQUE,
   phone VARCHAR(30),
+  address VARCHAR(255),
   password VARCHAR(255) NOT NULL,
   enabled TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 -- Mẫu: thay bằng bcrypt thực tế khi deploy
-INSERT INTO users (username, full_name, email, phone, password)
+INSERT INTO users (username, full_name, email, phone, address, password)
 VALUES 
-('admin', 'Admin User', 'admin@shop.com', '0900000001', '27112004'),
-('staff1', 'Staff One', 'staff1@shop.com', '0900000002', '27112004'),
-('thai', 'Thai Pham', 'thaiphamhuy3@gmail.com', '0900000003', '27112004');
+('admin', 'Admin User', 'admin@shop.com', '0900000001', '123 Nguyen Trai, Ha Noi', '27112004'),
+('staff1', 'Staff One', 'staff1@shop.com', '0900000002', '456 Le Loi, Da Nang', '27112004'),
+('thai', 'Thai Pham', 'thaiphamhuy3@gmail.com', '0900000003', 'Cau Giat, Quynh Luu, Nghe An', '27112004');
 
 -- 3) USER_ROLES
 CREATE TABLE user_roles (

@@ -23,7 +23,10 @@ public class User {
     
     @Column(name = "phone", length = 30)
     private String phone;
-    
+
+    @Column(name = "address", length = 255)
+    private String address;
+
     @Column(name = "password", nullable = false, length = 255)
     private String password;
     
@@ -37,13 +40,14 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String username, String fullName, String email, String phone, String password, 
+    public User(Long id, String username, String fullName, String email, String phone, String address, String password,
                 Boolean enabled, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
+        this.address = address;
         this.password = password;
         this.enabled = enabled;
         this.createdAt = createdAt;
@@ -88,6 +92,14 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getpassword() {
