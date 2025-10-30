@@ -30,18 +30,31 @@ public class OrderService {
 
     @Autowired
     private PaymentsRepository paymentsRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional
     public Order createOrder(CreateOrderRequest request) {
+        // Lấy thông tin User để đồng bộ
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
         // Find or create customer
         Customers customer = customersRepository.findByUserId(request.getUserId())
                 .orElseGet(() -> {
+                    // Tạo Customer mới từ thông tin User
                     Customers newCustomer = new Customers();
                     newCustomer.setUserId(request.getUserId());
-                    newCustomer.setFullName(request.getFullName());
-                    newCustomer.setAddress(request.getShippingAddress());
+                    newCustomer.setFullName(user.getFullName());
+                    newCustomer.setAddress(user.getAddress()); // Lấy từ User table
                     return customersRepository.save(newCustomer);
                 });
+
+        // Sử dụng address từ Customer (đã được đồng bộ từ User)
+        String shippingAddress = customer.getAddress() != null && !customer.getAddress().isEmpty() 
+                ? customer.getAddress() 
+                : request.getShippingAddress();
 
         // Create order
         Order order = new Order();
@@ -49,7 +62,7 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING"); // PENDING, PAID, PROCESSING, SHIPPED, DELIVERED, CANCELLED
         order.setTotal(request.getTotal());
-        order.setShippingAddress(request.getShippingAddress());
+        order.setShippingAddress(shippingAddress); // Ưu tiên address từ Customer
         
         Order savedOrder = orderRepository.save(order);
 
