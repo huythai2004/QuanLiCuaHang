@@ -16,6 +16,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
     public UserService(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
@@ -32,20 +33,25 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void deleteById (Long id) {
+    public void deleteById(Long id) {
         userRepository.deleteById(id);
     }
 
-    public User update (Long id, User user) {
-        return  userRepository.findById(id).map(u -> {
+    //Update User
+    public User update(Long id, User user) {
+        return userRepository.findById(id).map(u ->  {
             u.setUsername(user.getUsername());
             u.setFullName(user.getFullName());
-            u.setpassword(user.getpassword());
+            u.setAddress(user.getAddress());
             u.setEmail(user.getEmail());
             u.setPhone(user.getPhone());
             u.setEnabled(user.getEnabled());
+            // Only update password if provided
+            if(user.getpassword() != null && !user.getpassword().isEmpty()) {
+                u.setpassword(passwordEncoder.encode(user.getpassword()));
+            }
             return userRepository.save(u);
-        }).orElse(null);
+        }).orElseThrow(()-> new RuntimeException("User not found"));
     }
 
     // Register new user
@@ -63,8 +69,8 @@ public class UserService {
         }
 
         // Check if phone already exists
-        if (request.getPhone() != null && !request.getPhone().isEmpty() 
-            && userRepository.existsByPhone(request.getPhone())) {
+        if (request.getPhone() != null && !request.getPhone().isEmpty()
+                && userRepository.existsByPhone(request.getPhone())) {
             throw new Exception("Số điện thoại đã được sử dụng!");
         }
 
@@ -93,15 +99,14 @@ public class UserService {
             user = userRepository.findByPhone(emailOrPhone);
         }
 
-        // Check if user exists and password matches
-        if (user.isPresent() && user.get().getpassword().equals(password)) {
-            return user;
+        // Check if user exists and password matches with encoder
+        if (user.isPresent()) {
+            boolean isMatch = passwordEncoder.matches(password, user.get().getpassword());
+            if (isMatch) {
+                return user;
+            }
         }
-        // Compare password with password encoder
-        boolean isMatch = passwordEncoder.matches(password, user.get().getpassword());
-        if (isMatch) {
-            throw new RuntimeException("Sai mật khẩu! Vui lòng nhập lại.");
-        }
+        
         return Optional.empty();
     }
 }

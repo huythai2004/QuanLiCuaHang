@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { WishlistProvider } from './contexts/WishlistContext';
 import Header from './components/Layout/Header';
 import Login from './components/Pages/Login';
 import Signup from './components/Pages/signup';
@@ -21,9 +22,8 @@ import Cart from './components/Cart/Cart';
 import Payment from './components/Cart/Payment';
 import UserOrders from './components/Pages/UserOrders';
 import OrderDetail from './components/Pages/OrderDetail';
-import UserProfile from './components/Pages/UserProfile';
-import AdminDashboard from './components/Pages/AdminDashboard';
-
+import UserProfile from './components/Dashboard/UserProfile';
+import AdminDashboard from './components/Dashboard/AdminDashboard';
 import './css/main.css';
 import './css/util.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -52,10 +52,11 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <Router>
-          <div className="App">
-            <Header onSearchClick={() => setShowSearch(true)} />
-            <Search show={showSearch} onClose={() => setShowSearch(false)} />
+        <WishlistProvider>
+          <Router>
+            <div className="App">
+              <Header onSearchClick={() => setShowSearch(true)} />
+              <Search show={showSearch} onClose={() => setShowSearch(false)} />
           
           <main>
             <Routes>
@@ -73,6 +74,7 @@ function App() {
               <Route path='/payment' element={<Payment/>} />
               <Route path='/my-orders' element={<UserOrders/>} />
               <Route path='/order-detail/:orderId' element={<OrderDetail/>} />
+              <Route path='/order/:id' element={<OrderDetail/>} />
               <Route path='/profile' element={<UserProfile/>} />
               <Route path='/admin' element={<AdminDashboard/>} />
             </Routes>
@@ -81,6 +83,7 @@ function App() {
           <Footer />
         </div>
       </Router>
+        </WishlistProvider>
       </CartProvider>
     </AuthProvider>
   );

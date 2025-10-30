@@ -46,6 +46,7 @@ public class AuthResponse {
         private String fullName;
         private String email;
         private String phone;
+        private String address;
 
         public UserDTO() {
         }
@@ -56,6 +57,7 @@ public class AuthResponse {
             this.fullName = user.getFullName();
             this.email = user.getEmail();
             this.phone = user.getPhone();
+            this.address = user.getAddress();
         }
 
         // Getters and Setters
@@ -97,6 +99,14 @@ public class AuthResponse {
 
         public void setPhone(String phone) {
             this.phone = phone;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
         }
     }
 }

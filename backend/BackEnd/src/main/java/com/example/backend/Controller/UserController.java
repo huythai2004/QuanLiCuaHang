@@ -3,6 +3,7 @@ package com.example.backend.Controller;
 import com.example.backend.Entity.User;
 import com.example.backend.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,9 +31,15 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public User update(@PathVariable Long id, @RequestBody User user) {
-        return userService.update(id, user);
+    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
+        User u = userService.update(id, user);
+        return   ResponseEntity.ok(u);
     }
+
+//    @PutMapping("/with-password/{id}")
+//        public User updateWithPassword(@PathVariable Long id, @RequestBody User user) {
+//        return  userService.updatePassword(id, user);
+//        }
 
     @DeleteMapping("/{id}")
     public String delete(@PathVariable Long id) {
