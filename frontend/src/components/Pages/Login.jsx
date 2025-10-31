@@ -33,8 +33,8 @@ function Login() {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100">
-      <div className="card p-4 shadow" style={{ width: "400px" }}>
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "100vh", paddingTop: "120px", paddingBottom: "80px" }}>
+      <div className="card p-4 shadow" style={{ width: "400px", marginTop: "20px", marginBottom: "20px" }}>
         <h3 className="text-center mb-3">Đăng nhập</h3>
         {error && (
           <div className="alert alert-danger" role="alert">

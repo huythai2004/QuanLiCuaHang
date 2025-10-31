@@ -64,26 +64,29 @@ const UserProfile = () => {
       }
 
       // Call API to update user profile
-      const response = await fetch(`http://localhost:8080/users/${currentUser.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: currentUser.id,
-          username: currentUser.username,
-          fullName: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          address: formData.address || "",
-          enabled: currentUser.enabled || true,
-          password: null // Don't update password here
-        }),
-      });
+      const response = await fetch(
+        `http://localhost:8080/users/${currentUser.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: currentUser.id,
+            username: currentUser.username,
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.address || "",
+            enabled: currentUser.enabled || true,
+            password: "", // Empty string để backend không update password
+          }),
+        }
+      );
 
       if (response.ok) {
         const updatedUser = await response.json();
-        
+
         // Update localStorage with new data
         const storedUser = JSON.parse(localStorage.getItem("currentUser"));
         const newUserData = {
@@ -97,7 +100,7 @@ const UserProfile = () => {
 
         alert("Cập nhật thông tin thành công!");
         setIsEditing(false);
-        
+
         // Reload page to update context
         window.location.reload();
       } else {
@@ -272,17 +275,17 @@ const UserProfile = () => {
                         Chỉnh sửa
                       </button>
                     ) : (
-                      <div className="flex-w" style={{ gap: '10px' }}>
+                      <div className="flex-w" style={{ gap: "10px" }}>
                         <button
                           onClick={() => setIsEditing(false)}
                           className="flex-c-m stext-101 cl2 bor13 hov-btn3 trans-04 pointer"
                           style={{
-                            width: '120px',
-                            height: '45px',
-                            backgroundColor: '#29e8efff',
-                            border: '1px solid #e6e6e6',
-                            fontSize: '15px',
-                            fontWeight: '600'
+                            width: "120px",
+                            height: "45px",
+                            backgroundColor: "#29e8efff",
+                            border: "1px solid #e6e6e6",
+                            fontSize: "15px",
+                            fontWeight: "600",
                           }}
                         >
                           <i className="fa fa-times m-r-8"></i>
@@ -292,12 +295,12 @@ const UserProfile = () => {
                           onClick={handleSaveProfile}
                           className="flex-c-m stext-101 cl0 bor14 hov-btn3 trans-04 pointer"
                           style={{
-                            width: '120px',
-                            height: '45px',
-                            backgroundColor: '#e64a1aff',
-                            border: 'none',
-                            fontSize: '15px',
-                            fontWeight: '600'
+                            width: "120px",
+                            height: "45px",
+                            backgroundColor: "#e64a1aff",
+                            border: "none",
+                            fontSize: "15px",
+                            fontWeight: "600",
                           }}
                         >
                           <i className="fa fa-save m-r-8"></i>
@@ -351,7 +354,7 @@ const UserProfile = () => {
                         }`}
                       />
                     </div>
-                    
+
                     {/* TODO: Update address */}
                     <div className="col-md-12 p-b-20">
                       <label className="stext-111 cl2 p-b-10">Địa chỉ</label>
