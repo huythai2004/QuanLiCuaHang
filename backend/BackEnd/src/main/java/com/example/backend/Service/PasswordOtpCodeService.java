@@ -6,8 +6,10 @@ import com.example.backend.Repository.PasswordResetTokenRepository;
 import com.example.backend.Repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Random;
 
 
@@ -25,45 +27,91 @@ public class PasswordOtpCodeService {
         this.emailService = emailService;
     }
 
-    // Send OTP code
-    public void sendOtpCode(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email không tồn tại!"));
-        //Create OTP code
+    // Send OTP code - Support both email and phone
+    @Transactional
+    public void sendOtpCode(String emailOrPhone) {
+        if (emailOrPhone == null || emailOrPhone.trim().isEmpty()) {
+            throw new RuntimeException("Email hoặc số điện thoại không được để trống");
+        }
+
+        // Find user by email or phone
+        Optional<User> userOpt = userRepository.findByEmail(emailOrPhone);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByPhone(emailOrPhone);
+        }
+        
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Email/Số điện thoại không tồn tại hoặc chưa được đăng ký!");
+        }
+        
+        User user = userOpt.get();
+
+        // Delete old OTP tokens for this user
+        passwordResetTokenRepository.deleteByUserId(user.getId());
+
+        // Create OTP code (6 digits)
         String otp = String.format("%06d", new Random().nextInt(999999));
 
-        //Save in DB
+        // Save in DB
         Password_Reset_Token token = new Password_Reset_Token();
         token.setUserId(user.getId());
         token.setOtpCode(otp);
-        token.setExpiredAt(LocalDateTime.now().plusSeconds(30)); // Expire in 30 seconds
+        token.setExpiredAt(LocalDateTime.now().plusMinutes(5)); // Expire in 5 minutes
         token.setUsed(false);
         passwordResetTokenRepository.save(token);
 
-        //Send Email
-        //sendEmail(email, "Mã OTP của bạn là: " + otp + ". Mã này sẽ hết hạn trong 30 giây.");
-        emailService.sendOtpEmail(email, otp);
+        // Send Email
+        try {
+            emailService.sendOtpEmail(user.getEmail(), otp);
+        } catch (Exception e) {
+            throw new RuntimeException("Không thể gửi email. Vui lòng thử lại sau.");
+        }
     }
 
-//    //Function to send email
-//    public void sendEmail(String email, String message) {
-//        System.out.println("Sending email to " + email + " with message: " + message);
-//    }
+    // Reset password with OTP code
+    @Transactional
+    public void resetPassword(String emailOrPhone, String otpCode, String newPassword) {
+        // Validate input
+        if (emailOrPhone == null || emailOrPhone.trim().isEmpty()) {
+            throw new RuntimeException("Email/Số điện thoại không được để trống");
+        }
+        if (otpCode == null || otpCode.trim().isEmpty()) {
+            throw new RuntimeException("Mã OTP không được để trống");
+        }
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new RuntimeException("Mật khẩu mới phải có ít nhất 8 ký tự");
+        }
 
-    //Confirm OTP code
-    public void resetPassword(String email, String otpCode, String newPassword) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email không tồn tại!"));
+        // Find user by email or phone
+        Optional<User> userOpt = userRepository.findByEmail(emailOrPhone);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByPhone(emailOrPhone);
+        }
+        
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Email/Số điện thoại không tồn tại hoặc chưa được đăng ký!");
+        }
+        
+        User user = userOpt.get();
 
-        Password_Reset_Token token = passwordResetTokenRepository.findByUserIdAndOtpCode(user.getId(), otpCode).orElseThrow(() -> new RuntimeException("Mã OTP không hợp lệ!"));
-
+        // Find and validate OTP token
+        Password_Reset_Token token = passwordResetTokenRepository
+                .findByUserIdAndOtpCode(user.getId(), otpCode)
+                .orElseThrow(() -> new RuntimeException("Mã OTP không hợp lệ!"));
+                
+        if (token.getUsed()) {
+            throw new RuntimeException("Mã OTP đã được sử dụng");
+        }
+        
         if (token.getExpiredAt().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Mã OTP đã hết hạn!");
         }
 
-        //Update new password
-        user.setpassword((passwordEncoder.encode(newPassword)));
+        // Update new password (fix: remove extra parentheses)
+        user.setpassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        //Confirm OTP code
+        // Mark OTP as used
         token.setUsed(true);
         passwordResetTokenRepository.save(token);
     }

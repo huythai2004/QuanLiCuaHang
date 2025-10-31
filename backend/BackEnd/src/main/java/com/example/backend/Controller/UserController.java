@@ -33,7 +33,7 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
         User u = userService.update(id, user);
-        return   ResponseEntity.ok(u);
+        return ResponseEntity.ok(u);
     }
 
 //    @PutMapping("/with-password/{id}")
