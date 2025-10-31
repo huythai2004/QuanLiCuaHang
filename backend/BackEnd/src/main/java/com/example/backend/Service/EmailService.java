@@ -14,11 +14,24 @@ public class EmailService {
 
     @Async
     public void sendOtpEmail(String to, String otpCode) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Mã xác nhận đặt lại mật khẩu");
-        message.setText("Xin chào!\n\nMã OTP của bạn là: " + otpCode +
-                "\nMã này có hiệu lực trong 30s.\\n\\nNếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.");
-        javaMailSender.send(message);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject("[Quản Lý Cửa Hàng] Mã OTP Đặt Lại Mật Khẩu");
+            message.setText(
+                "Xin chào,\n\n" +
+                "Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình.\n\n" +
+                "Mã OTP của bạn là: " + otpCode + "\n\n" +
+                "Mã này có hiệu lực trong 5 phút.\n\n" +
+                "Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.\n\n" +
+                "Trân trọng,\n" +
+                "Monsieur Tom"
+            );
+            javaMailSender.send(message);
+            System.out.println("Email OTP đã gửi thành công đến: " + to);
+        } catch (Exception e) {
+            System.err.println("Lỗi gửi email: " + e.getMessage());
+            throw new RuntimeException("Không thể gửi email OTP: " + e.getMessage());
+        }
     }
 }

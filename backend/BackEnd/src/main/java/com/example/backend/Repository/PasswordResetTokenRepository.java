@@ -7,4 +7,7 @@ import java.util.Optional;
 
 public interface PasswordResetTokenRepository extends JpaRepository<Password_Reset_Token, Long> {
     Optional<Password_Reset_Token> findByUserIdAndOtpCode(Long userId, String otpCode);
+
+    // Delete all OTP tokens for a user (clean old OTPs)
+    void deleteByUserId(Long userId);
 }
