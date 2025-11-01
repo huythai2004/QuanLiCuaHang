@@ -42,15 +42,6 @@ public class ProductsController {
         return ResponseEntity.ok().body(saveProducts);
     }
 
-    /**
-     * create new product with upload images from URLs to Cloudinary
-     * Body: {
-     *   "sku": "...",
-     *   "name": "...",
-     *   ...
-     *   "imageUrls": ["url1", "url2", ...]
-     * }
-     */
     @PostMapping("/with-images")
     public ResponseEntity<Map<String, Object>> createWithImages(@RequestBody CreateProductWithImagesRequest request) {
         Map<String, Object> response = new HashMap<>();
@@ -80,7 +71,6 @@ public class ProductsController {
             existing.setPrice(products.getPrice());
             existing.setStockQty(products.getStockQty());
             existing.setIsActive(products.getIsActive());
-            existing.setCreatedAt(products.getCreatedAt());
             Products updateProducts = productsService.save(existing);
             return ResponseEntity.ok(updateProducts);
         }).orElse(ResponseEntity.notFound().build());
