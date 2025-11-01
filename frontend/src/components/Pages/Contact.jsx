@@ -1,8 +1,78 @@
+import React, { useState } from "react";
 import "../../css/main.css";
 import "../../css/util.css";
 import Email from "../../images/icons/icon-email.png";
 import Images from "../../images/bg-01.jpg";
+
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    email: "",
+    message: "",
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    setError("");
+    setSuccess("");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setLoading(true);
+
+    // Validation
+    if (!formData.email || !formData.email.includes("@")) {
+      setError("Vui lòng nhập email hợp lệ!");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.message || formData.message.trim().length < 10) {
+      setError("Nội dung tin nhắn phải có ít nhất 10 ký tự!");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/api/contact/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          message: formData.message.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccess(data.message || "Tin nhắn của bạn đã được gửi thành công!");
+        // Reset form
+        setFormData({
+          email: "",
+          message: "",
+        });
+      } else {
+        setError(data.message || "Đã có lỗi xảy ra khi gửi tin nhắn!");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setError("Lỗi kết nối đến server. Vui lòng thử lại sau!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       {/* Title page */}
@@ -23,31 +93,93 @@ export default function Contact() {
                   Send Us A Message
                 </h4>
 
-                <div className="bor8 m-b-20 how-pos4-parent">
-                  <input
-                    className="stext-111 cl2 plh3 size-116 p-l-62 p-r-30"
-                    type="text"
-                    name="email"
-                    placeholder="Your Email Address"
-                  />
-                  <img
-                    className="how-pos4 pointer-none"
-                    src={Email}
-                    alt="ICON"
-                  />
-                </div>
+                {error && (
+                  <div
+                    className="alert alert-danger m-b-20"
+                    role="alert"
+                    style={{
+                      backgroundColor: "#f8d7da",
+                      color: "#721c24",
+                      padding: "12px 20px",
+                      borderRadius: "5px",
+                      border: "1px solid #f5c6cb",
+                    }}
+                  >
+                    <i className="fa fa-exclamation-triangle m-r-8"></i>
+                    {error}
+                  </div>
+                )}
 
-                <div className="bor8 m-b-30">
-                  <textarea
-                    className="stext-111 cl2 plh3 size-120 p-lr-28 p-tb-25"
-                    name="msg"
-                    placeholder="How Can We Help?"
-                  ></textarea>
-                </div>
+                {success && (
+                  <div
+                    className="alert alert-success m-b-20"
+                    role="alert"
+                    style={{
+                      backgroundColor: "#d4edda",
+                      color: "#155724",
+                      padding: "12px 20px",
+                      borderRadius: "5px",
+                      border: "1px solid #c3e6cb",
+                    }}
+                  >
+                    <i className="fa fa-check-circle m-r-8"></i>
+                    {success}
+                  </div>
+                )}
 
-                <button className="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
-                  Submit
-                </button>
+                <form onSubmit={handleSubmit}>
+                  <div className="bor8 m-b-20 how-pos4-parent">
+                    <input
+                      className="stext-111 cl2 plh3 size-116 p-l-62 p-r-30"
+                      type="email"
+                      name="email"
+                      placeholder="Your Email Address"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                    />
+                    <img
+                      className="how-pos4 pointer-none"
+                      src={Email}
+                      alt="ICON"
+                    />
+                  </div>
+
+                  <div className="bor8 m-b-30">
+                    <textarea
+                      className="stext-111 cl2 plh3 size-120 p-lr-28 p-tb-25"
+                      name="message"
+                      placeholder="How Can We Help?"
+                      value={formData.message}
+                      onChange={handleChange}
+                      rows="6"
+                      required
+                      minLength="10"
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer"
+                    disabled={loading}
+                    style={{
+                      opacity: loading ? 0.6 : 1,
+                      cursor: loading ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {loading ? (
+                      <>
+                        <i className="fa fa-spinner fa-spin m-r-8"></i>
+                        Đang gửi...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa fa-paper-plane m-r-8"></i>
+                        Submit
+                      </>
+                    )}
+                  </button>
+                </form>
               </div>
             </div>
 

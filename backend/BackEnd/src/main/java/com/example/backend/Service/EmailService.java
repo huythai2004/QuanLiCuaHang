@@ -34,4 +34,29 @@ public class EmailService {
             throw new RuntimeException("Không thể gửi email OTP: " + e.getMessage());
         }
     }
+
+    @Async
+    public void sendContactEmail(String fromEmail, String message, String adminEmail) {
+        try {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            mailMessage.setTo(adminEmail);
+            mailMessage.setSubject("[Quản Lý Cửa Hàng] Tin Nhắn Liên Hệ Mới");
+            mailMessage.setText(
+                "Bạn có một tin nhắn liên hệ mới từ website!\n\n" +
+                "─────────────────────────────────────\n\n" +
+                "Email người gửi: " + fromEmail + "\n\n" +
+                "Nội dung tin nhắn:\n" +
+                message + "\n\n" +
+                "─────────────────────────────────────\n\n" +
+                "Trân trọng,\n" +
+                "Hệ Thống Quản Lý Cửa Hàng\n" +
+                "Thời gian: " + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
+            );
+            javaMailSender.send(mailMessage);
+            System.out.println("Email liên hệ đã gửi thành công đến admin: " + adminEmail);
+        } catch (Exception e) {
+            System.err.println("Lỗi gửi email liên hệ: " + e.getMessage());
+            throw new RuntimeException("Không thể gửi email liên hệ: " + e.getMessage());
+        }
+    }
 }
