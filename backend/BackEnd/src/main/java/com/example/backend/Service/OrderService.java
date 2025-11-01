@@ -2,7 +2,10 @@ package com.example.backend.Service;
 
 import com.example.backend.DTO.CreateOrderRequest;
 import com.example.backend.DTO.OrderDetailResponse;
-import com.example.backend.Entity.*;
+import com.example.backend.Entity.Customers;
+import com.example.backend.Entity.Order;
+import com.example.backend.Entity.Order_Items;
+import com.example.backend.Entity.User;
 import com.example.backend.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,31 +33,27 @@ public class OrderService {
 
     @Autowired
     private PaymentsRepository paymentsRepository;
-    
+
     @Autowired
     private UserRepository userRepository;
 
     @Transactional
     public Order createOrder(CreateOrderRequest request) {
-        // Lấy thông tin User để đồng bộ
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        // Find or create customer
-        Customers customer = customersRepository.findByUserId(request.getUserId())
-                .orElseGet(() -> {
-                    // Tạo Customer mới từ thông tin User
-                    Customers newCustomer = new Customers();
-                    newCustomer.setUserId(request.getUserId());
-                    newCustomer.setFullName(user.getFullName());
-                    newCustomer.setAddress(user.getAddress()); // Lấy từ User table
-                    return customersRepository.save(newCustomer);
-                });
+        // Get User information to sync
+        User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Sử dụng address từ Customer (đã được đồng bộ từ User)
-        String shippingAddress = customer.getAddress() != null && !customer.getAddress().isEmpty() 
-                ? customer.getAddress() 
-                : request.getShippingAddress();
+        // Find or create customer
+        Customers customer = customersRepository.findByUserId(request.getUserId()).orElseGet(() -> {
+            // Tạo Customer mới từ thông tin User
+            Customers newCustomer = new Customers();
+            newCustomer.setUserId(request.getUserId());
+            newCustomer.setFullName(user.getFullName());
+            newCustomer.setAddress(user.getAddress()); // Lấy từ User table
+            return customersRepository.save(newCustomer);
+        });
+
+        // Use address from Customer synsc
+        String shippingAddress = customer.getAddress() != null && !customer.getAddress().isEmpty() ? customer.getAddress() : request.getShippingAddress();
 
         // Create order
         Order order = new Order();
@@ -63,7 +62,7 @@ public class OrderService {
         order.setStatus("PENDING"); // PENDING, PAID, PROCESSING, SHIPPED, DELIVERED, CANCELLED
         order.setTotal(request.getTotal());
         order.setShippingAddress(shippingAddress); // Ưu tiên address từ Customer
-        
+
         Order savedOrder = orderRepository.save(order);
 
         // Create order items
@@ -73,12 +72,10 @@ public class OrderService {
             orderItem.setProductId(itemDTO.getProductId());
             orderItem.setQuantity(itemDTO.getQuantity());
             orderItem.setUnitPrice(itemDTO.getUnitPrice());
-            // Note: line_total is a GENERATED COLUMN in database, don't set it here
             // orderItem.setLineTotal(itemDTO.getUnitPrice().multiply(BigDecimal.valueOf(itemDTO.getQuantity())));
-            
+
             orderItemsRepository.save(orderItem);
         }
-
         return savedOrder;
     }
 
@@ -86,28 +83,24 @@ public class OrderService {
     public BigDecimal getOrderTotal(Long orderId) {
         List<Order_Items> orderItems = orderItemsRepository.findByOrderId(orderId);
 
-        if(orderItems.isEmpty()) {
+        if (orderItems.isEmpty()) {
             throw new RuntimeException("Không tìm thấy sản phẩm trong đơn hàng ID: " + orderId);
         }
         //Fallback
-        return orderItems.stream()
-                .map(item -> {
-                    if(item.getLineTotal() != null) {
-                        return item.getLineTotal();
-                    } else {
-                        return item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-                    }
-                })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return orderItems.stream().map(item -> {
+            if (item.getLineTotal() != null) {
+                return item.getLineTotal();
+            } else {
+                return item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+            }
+        }).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     // Function Get order Detail
     public OrderDetailResponse getOrderDetail(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
 
-        Customers customer = customersRepository.findById(order.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customers customer = customersRepository.findById(order.getCustomerId()).orElseThrow(() -> new RuntimeException("Customer not found"));
 
         List<Order_Items> orderItems = orderItemsRepository.findByOrderId(orderId);
 
@@ -158,44 +151,56 @@ public class OrderService {
     }
 
     public List<OrderDetailResponse> getOrdersByCustomer(Long userId) {
-        Customers customer = customersRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customers customer = customersRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("Customer not found"));
 
         List<Order> orders = orderRepository.findByCustomerIdOrderByOrderDateDesc(customer.getId());
 
-        return orders.stream()
-                .map(order -> getOrderDetail(order.getId()))
-                .collect(Collectors.toList());
+        return orders.stream().map(order -> getOrderDetail(order.getId())).collect(Collectors.toList());
     }
 
     public List<OrderDetailResponse> getAllOrders() {
         List<Order> orders = orderRepository.findAll();
-        return orders.stream()
-                .map(order -> getOrderDetail(order.getId()))
-                .collect(Collectors.toList());
+        return orders.stream().map(order -> getOrderDetail(order.getId())).collect(Collectors.toList());
     }
 
     @Transactional
     public void updateOrderStatus(Long orderId, String status) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
         order.setStatus(status);
         orderRepository.save(order);
     }
 
     @Transactional
     public void cancelOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
-        
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
         // Chỉ cho phép hủy đơn hàng đang chờ thanh toán
         if (!"PENDING".equals(order.getStatus())) {
             throw new RuntimeException("Chỉ có thể hủy đơn hàng đang chờ thanh toán");
         }
-        
+
         // Cập nhật status thành CANCELLED
         order.setStatus("CANCELLED");
         orderRepository.save(order);
+    }
+
+    @Transactional
+    public void deleteOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        // Chỉ cho phép xóa đơn hàng đã hủy
+        if (!"CANCELLED".equals(order.getStatus())) {
+            throw new RuntimeException("Chỉ có thể xóa đơn hàng đã hủy");
+        }
+
+        // delete order items first
+        orderItemsRepository.deleteByOrderId(orderId);
+        
+        // delete payments
+        paymentsRepository.deleteByOrderId(orderId);
+        
+        // delete order
+        orderRepository.deleteById(orderId);
     }
 }
 
