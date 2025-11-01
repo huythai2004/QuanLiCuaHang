@@ -7,7 +7,7 @@ import "../../css/util.css";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-  
+
   // States
   const [step, setStep] = useState(1); // 1: Send OTP, 2: Verify OTP & Reset Password
   const [emailOrPhone, setEmailOrPhone] = useState("");
@@ -32,13 +32,15 @@ export default function ResetPassword() {
     e.preventDefault();
     setMessage(null);
     setError(null);
-    
+
     try {
       const res = await fetch(
-        `http://localhost:8080/auth/forgot-password?emailOrPhone=${encodeURIComponent(emailOrPhone)}`,
+        `http://localhost:8080/auth/forgot-password?emailOrPhone=${encodeURIComponent(
+          emailOrPhone
+        )}`,
         { method: "POST" }
       );
-      
+
       if (res.ok) {
         const text = await res.text();
         setMessage(text);
@@ -109,13 +111,15 @@ export default function ResetPassword() {
   const handleResendOTP = async () => {
     setError(null);
     setMessage(null);
-    
+
     try {
       const res = await fetch(
-        `http://localhost:8080/auth/forgot-password?emailOrPhone=${encodeURIComponent(emailOrPhone)}`,
+        `http://localhost:8080/auth/forgot-password?emailOrPhone=${encodeURIComponent(
+          emailOrPhone
+        )}`,
         { method: "POST" }
       );
-      
+
       if (res.ok) {
         const text = await res.text();
         setMessage(text);
@@ -130,8 +134,14 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "100vh", paddingTop: "120px", paddingBottom: "80px" }}>
-      <div className="card p-4 shadow" style={{ width: "450px", marginTop: "20px", marginBottom: "20px" }}>
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{ minHeight: "100vh", paddingTop: "120px", paddingBottom: "80px" }}
+    >
+      <div
+        className="card p-4 shadow"
+        style={{ width: "450px", marginTop: "20px", marginBottom: "20px" }}
+      >
         <h3 className="text-center mb-3">
           {step === 1 ? "Quên mật khẩu" : "Đặt lại mật khẩu"}
         </h3>
@@ -139,21 +149,46 @@ export default function ResetPassword() {
         {/* Progress indicator */}
         <div className="mb-4">
           <div className="d-flex justify-content-between">
-            <div className={`text-center ${step === 1 ? "text-primary fw-bold" : "text-muted"}`}>
-              <div className={`rounded-circle d-inline-flex align-items-center justify-content-center ${step === 1 ? "bg-primary text-white" : "bg-secondary text-white"}`} style={{ width: "30px", height: "30px" }}>
+            <div
+              className={`text-center ${
+                step === 1 ? "text-primary fw-bold" : "text-muted"
+              }`}
+            >
+              <div
+                className={`rounded-circle d-inline-flex align-items-center justify-content-center ${
+                  step === 1
+                    ? "bg-primary text-white"
+                    : "bg-secondary text-white"
+                }`}
+                style={{ width: "30px", height: "30px" }}
+              >
                 1
               </div>
               <div className="small mt-1">Gửi OTP</div>
             </div>
-            <div className={`text-center ${step === 2 ? "text-primary fw-bold" : "text-muted"}`}>
-              <div className={`rounded-circle d-inline-flex align-items-center justify-content-center ${step === 2 ? "bg-primary text-white" : "bg-secondary text-white"}`} style={{ width: "30px", height: "30px" }}>
+            <div
+              className={`text-center ${
+                step === 2 ? "text-primary fw-bold" : "text-muted"
+              }`}
+            >
+              <div
+                className={`rounded-circle d-inline-flex align-items-center justify-content-center ${
+                  step === 2
+                    ? "bg-primary text-white"
+                    : "bg-secondary text-white"
+                }`}
+                style={{ width: "30px", height: "30px" }}
+              >
                 2
               </div>
               <div className="small mt-1">Xác nhận</div>
             </div>
           </div>
           <div className="progress mt-2" style={{ height: "4px" }}>
-            <div className="progress-bar" style={{ width: step === 1 ? "50%" : "100%" }}></div>
+            <div
+              className="progress-bar"
+              style={{ width: step === 1 ? "50%" : "100%" }}
+            ></div>
           </div>
         </div>
 
@@ -204,12 +239,18 @@ export default function ResetPassword() {
               </small>
             </div>
             <button type="submit" className="btn btn-primary w-100 mb-3">
-              <i className="fa fa-paper-plane" style={{ marginRight: "8px" }}></i>
+              <i
+                className="fa fa-paper-plane"
+                style={{ marginRight: "8px" }}
+              ></i>
               Gửi mã OTP
             </button>
             <div className="text-center">
               <Link to="/login" className="text-decoration-none">
-                <i className="fa fa-arrow-left" style={{ marginRight: "4px" }}></i>
+                <i
+                  className="fa fa-arrow-left"
+                  style={{ marginRight: "4px" }}
+                ></i>
                 Quay lại đăng nhập
               </Link>
             </div>
@@ -220,9 +261,7 @@ export default function ResetPassword() {
         {step === 2 && (
           <form onSubmit={handleResetPassword}>
             <div className="mb-3">
-              <label className="form-label">
-                Email/SĐT:
-              </label>
+              <label className="form-label">Email/SĐT:</label>
               <input
                 type="text"
                 className="form-control bg-light"
@@ -308,7 +347,10 @@ export default function ResetPassword() {
                   setMessage(null);
                 }}
               >
-                <i className="fa fa-arrow-left" style={{ marginRight: "4px" }}></i>
+                <i
+                  className="fa fa-arrow-left"
+                  style={{ marginRight: "4px" }}
+                ></i>
                 Quay lại
               </button>
               <button
