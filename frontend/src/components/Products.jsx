@@ -10,7 +10,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../fonts/iconic/css/material-design-iconic-font.min.css";
 import iconHeart1 from "../images/icons/icon-heart-01.png";
 import iconHeart2 from "../images/icons/icon-heart-02.png";
-import Filter from "./Filter";
+import Filter from "./Search/Filter";
 import QuickViewModal from "./QuickViewModal";
 
 export default function Products() {
