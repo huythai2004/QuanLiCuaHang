@@ -107,9 +107,14 @@ public class PasswordOtpCodeService {
             throw new RuntimeException("Mã OTP đã hết hạn!");
         }
 
-        // Update new password (fix: remove extra parentheses)
-        user.setpassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        // Update new password
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        System.out.println("Resetting password for user: " + user.getId() + " (" + user.getEmail() + ")");
+        System.out.println("New password hash: " + encodedPassword.substring(0, Math.min(20, encodedPassword.length())) + "...");
+        user.setpassword(encodedPassword);
+        // Use saveAndFlush to ensure password is saved to database immediately
+        User savedUser = userRepository.saveAndFlush(user);
+        System.out.println("Password reset completed for user: " + savedUser.getId());
 
         // Mark OTP as used
         token.setUsed(true);
