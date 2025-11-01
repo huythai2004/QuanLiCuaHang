@@ -9,6 +9,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import slide01 from "../../images/slide-01.jpg";
 import slide02 from "../../images/slide-02.jpg";
 import slide03 from "../../images/slide-03.jpg";
+import iconPrev from "../../images/icons/icon-prev.png";
+import iconNext from "../../images/icons/icon-next.png";
 
 export default function Slider() {
   const slickRef = useRef(null);
@@ -48,11 +50,7 @@ export default function Slider() {
         slidesToScroll: 1,
         fade: true,
         dots: true,
-        arrows: true,
-        prevArrow:
-          '<button class="slick-prev slick-arrow" type="button"><i class="zmdi zmdi-chevron-left"></i></button>',
-        nextArrow:
-          '<button class="slick-next slick-arrow" type="button"><i class="zmdi zmdi-chevron-right"></i></button>',
+        arrows: false, // Tắt arrows mặc định, dùng nút custom
         dotsClass: "slick1-dots",
         customPaging: function (slick, index) {
           const slide = $(slick.$slides[index]);
@@ -104,9 +102,102 @@ export default function Slider() {
     };
   }, [imagesLoaded]);
 
+  const handlePrevSlide = () => {
+    if (slickRef.current) {
+      const $slider = $(slickRef.current);
+      if ($slider.hasClass("slick-initialized")) {
+        $slider.slick("slickPrev");
+      }
+    }
+  };
+
+  const handleNextSlide = () => {
+    if (slickRef.current) {
+      const $slider = $(slickRef.current);
+      if ($slider.hasClass("slick-initialized")) {
+        $slider.slick("slickNext");
+      }
+    }
+  };
+
   return (
     <div>
-      <section className="section-slide">
+      <section className="section-slide" style={{ position: "relative" }}>
+        {/* Custom Navigation Buttons */}
+        <button
+          onClick={handlePrevSlide}
+          className="slick-custom-prev"
+          style={{
+            position: "absolute",
+            left: "20px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+            background: "rgba(255, 255, 255, 0.7)",
+            border: "none",
+            borderRadius: "50%",
+            width: "50px",
+            height: "50px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all 0.3s ease",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = "rgba(255, 255, 255, 0.9)";
+            e.target.style.transform = "translateY(-50%) scale(1.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = "rgba(255, 255, 255, 0.7)";
+            e.target.style.transform = "translateY(-50%) scale(1)";
+          }}
+        >
+          <img
+            src={iconPrev}
+            alt="Previous"
+            style={{ width: "24px", height: "24px" }}
+          />
+        </button>
+
+        <button
+          onClick={handleNextSlide}
+          className="slick-custom-next"
+          style={{
+            position: "absolute",
+            right: "20px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+            background: "rgba(255, 255, 255, 0.7)",
+            border: "none",
+            borderRadius: "50%",
+            width: "50px",
+            height: "50px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all 0.3s ease",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = "rgba(255, 255, 255, 0.9)";
+            e.target.style.transform = "translateY(-50%) scale(1.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = "rgba(255, 255, 255, 0.7)";
+            e.target.style.transform = "translateY(-50%) scale(1)";
+          }}
+        >
+          <img
+            src={iconNext}
+            alt="Next"
+            style={{ width: "24px", height: "24px" }}
+          />
+        </button>
+
         <div className="wrap-slick1">
           <div className="slick1" ref={slickRef}>
             {/* Slide 1 */}
