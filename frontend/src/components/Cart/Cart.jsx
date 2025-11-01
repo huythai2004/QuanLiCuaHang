@@ -51,6 +51,14 @@ export default function Cart() {
       return;
     }
 
+    // Kiểm tra xem user đã có địa chỉ chưa
+    if (!currentUser.address || currentUser.address.trim() === "") {
+      if (window.confirm("Bạn chưa có địa chỉ giao hàng. Vui lòng cập nhật địa chỉ trong trang Profile. Chuyển đến trang Profile?")) {
+        navigate("/profile");
+      }
+      return;
+    }
+
     try {
       // Prepare order data
       const shippingFee = getTotalPrice() >= 1000000 ? 0 : 30000;
@@ -60,7 +68,7 @@ export default function Cart() {
         userId: currentUser.id,
         fullName: currentUser.fullName || currentUser.username,
         phone: currentUser.phone || "",
-        shippingAddress: "Địa chỉ mặc định", // TODO: Get from user input
+        shippingAddress: currentUser.address, // Lấy address từ user đã update
         total: totalAmount,
         items: cartItems.map(item => ({
           productId: item.id,
@@ -274,44 +282,67 @@ export default function Cart() {
                     </div>
                   </div>
 
-                  <div className="flex-w flex-t bor12 p-t-15 p-b-30">
+                  <div className="flex-w flex-t bor12 p-t-15 p-b-15">
                     <div className="size-208 w-full-ssm">
                       <span className="stext-110 cl2">Phí vận chuyển:</span>
                     </div>
 
                     <div className="size-209 p-r-18 p-r-0-sm w-full-ssm">
-                      <p className="stext-111 cl6 p-t-2">
-                        Miễn phí vận chuyển cho đơn hàng trên 1,000,000đ
+                      <span className="mtext-110" style={{ color: '#e65540' }}>
+                        {getTotalPrice() >= 1000000 ? "Miễn phí" : <>30,000<span style={{ fontSize: '0.85em' }}>đ</span></>}
+                      </span>
+                      <p className="stext-111 cl6 p-t-5" style={{ fontSize: '12px' }}>
+                        (Miễn phí cho đơn hàng trên 1,000,000đ)
                       </p>
-
-                      <div className="p-t-15">
-                        <span className="mtext-110" style={{ color: '#e65540' }}>
-                          {getTotalPrice() >= 1000000 ? "Miễn phí" : <>30,000<span style={{ fontSize: '0.85em' }}>đ</span></>}
-                        </span>
-                      </div>
                     </div>
                   </div>
 
-                  <div className="flex-w flex-t p-t-27 p-b-33">
-                    <div className="size-208">
-                      <span className="mtext-101 cl2">Tổng cộng:</span>
+                  <div className="flex-w flex-sb-m p-t-20 p-b-30" style={{ borderTop: '2px solid #e6e6e6', paddingTop: '20px' }}>
+                    <div>
+                      <span className="mtext-101 cl2" style={{ fontSize: '18px' }}>Tổng cộng:</span>
                     </div>
-
-                    <div className="size-209 p-t-1">
-                      <span className="mtext-110" style={{ color: '#e65540', fontWeight: 'bold' }}>
+                    <div>
+                      <span className="mtext-110" style={{ color: '#e65540', fontWeight: 'bold', fontSize: '24px' }}>
                         {(getTotalPrice() + (getTotalPrice() >= 1000000 ? 0 : 30000)).toLocaleString('vi-VN')}
                         <span style={{ fontSize: '0.85em' }}>đ</span>
                       </span>
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    className="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
-                    onClick={handleCheckout}
-                  >
-                    Thanh toán
-                  </button>
+                  {/* Nút Xem chi tiết và Thanh toán */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <button
+                      type="button"
+                      className="flex-c-m stext-101 cl0 bor14 hov-btn3 trans-04 pointer"
+                      style={{
+                        width: '100%',
+                        height: '50px',
+                        backgroundColor: '#6c7ae0',
+                        border: 'none',
+                        fontSize: '15px',
+                        fontWeight: '600'
+                      }}
+                      onClick={() => navigate("/my-orders")}
+                    >
+                      Xem chi tiết đơn hàng
+                    </button>
+                    
+                    <button
+                      type="button"
+                      className="flex-c-m stext-101 cl0 bor14 hov-btn3 trans-04 pointer"
+                      style={{
+                        width: '100%',
+                        height: '50px',
+                        backgroundColor: '#e65540',
+                        border: 'none',
+                        fontSize: '15px',
+                        fontWeight: '600'
+                      }}
+                      onClick={handleCheckout}
+                    >
+                      Thanh toán
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

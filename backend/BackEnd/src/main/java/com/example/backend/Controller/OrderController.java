@@ -99,14 +99,31 @@ public class OrderController {
         }
     }
 
-    // Cancel order (Delete/Cancel)
-    @DeleteMapping("/{orderId}")
+    // Cancel order (Update status to CANCELLED)
+    @PutMapping("/{orderId}/cancel")
     public ResponseEntity<?> cancelOrder(@PathVariable Long orderId) {
         try {
-            orderService.cancelOrder(orderId);
+            orderService.updateOrderStatus(orderId, "CANCELLED");
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Đơn hàng đã được hủy thành công"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    // Delete order
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
+        try {
+            orderService.deleteOrder(orderId);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đơn hàng đã được xóa thành công"
             ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of(

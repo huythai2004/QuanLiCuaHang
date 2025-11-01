@@ -11,7 +11,7 @@ const VNPayPaymentPage = () => {
   const [error, setError] = useState('');
 
   // Lấy thông tin đơn hàng từ backend
-  useEffect(() => {
+  useEffect(() => {                          
     const fetchOrderData = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const orderId = urlParams.get('orderId');
