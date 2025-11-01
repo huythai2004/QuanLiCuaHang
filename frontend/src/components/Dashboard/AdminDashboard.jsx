@@ -194,7 +194,7 @@ const AdminDashboard = () => {
       <div className="container">
         <div className="flex-w">
           {/* Sidebar */}
-          <div className="bg-dark" style={{ width: "250px", flexShrink: 0 }}>
+          <div className="bg-light" style={{ width: "250px", flexShrink: 0 }}>
             <div
               className="p-all-30"
               style={{
