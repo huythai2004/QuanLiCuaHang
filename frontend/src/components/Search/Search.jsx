@@ -1,6 +1,5 @@
 
-import closeIcon from "../images/icons/icon-close2.png";
-
+import closeIcon from "../../images/icons/icon-close2.png";
 function Search({ show, onClose }) {
   if (!show) return null;
 

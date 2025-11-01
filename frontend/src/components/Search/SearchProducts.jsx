@@ -1,6 +1,6 @@
 import React from "react";
-import "../css/main.css";
-import "../css/util.css";
+import "../../css/main.css";
+import "../../css/util.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function SearchProducts() {

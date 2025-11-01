@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import "../css/main.css";
-import "../css/util.css";
-import "../fonts/iconic/css/material-design-iconic-font.min.css";
+import "../../css/main.css";
+import "../../css/util.css";
+import "../../fonts/iconic/css/material-design-iconic-font.min.css";
 
 export default function Filter({ onFilterChange }) {
   const [selectedSort, setSelectedSort] = useState("default");
