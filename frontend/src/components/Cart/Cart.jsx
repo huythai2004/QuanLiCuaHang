@@ -109,7 +109,7 @@ export default function Cart() {
   return (
     <>
       {/* Breadcrumb */}
-      <div className="container">
+      <div className="container" style={{ paddingTop: '120px' }}>
         <div className="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
           <a
             href="/"

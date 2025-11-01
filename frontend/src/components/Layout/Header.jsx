@@ -60,6 +60,23 @@ export default function Header({ onSearchClick }) {
                     ></i>
                     {currentUser.username}
                   </Link>
+                  {currentUser.role === 'ADMIN' && (
+                    <Link
+                      to="/admin"
+                      className="flex-c-m trans-04 p-lr-25"
+                      style={{
+                        color: "#fff",
+                        textDecoration: "none",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      <i
+                        className="fa fa-dashboard"
+                        style={{ marginRight: "8px" }}
+                      ></i>
+                      Admin
+                    </Link>
+                  )}
                   <Link
                     to="/my-orders"
                     className="flex-c-m trans-04 p-lr-25"
