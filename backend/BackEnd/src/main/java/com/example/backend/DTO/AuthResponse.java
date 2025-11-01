@@ -1,6 +1,10 @@
 package com.example.backend.DTO;
 
+import com.example.backend.Entity.Roles;
 import com.example.backend.Entity.User;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AuthResponse {
     private boolean success;
@@ -47,6 +51,8 @@ public class AuthResponse {
         private String email;
         private String phone;
         private String address;
+        private Boolean enabled;
+        private Set<String> roles;
 
         public UserDTO() {
         }
@@ -58,6 +64,16 @@ public class AuthResponse {
             this.email = user.getEmail();
             this.phone = user.getPhone();
             this.address = user.getAddress();
+            this.enabled = user.getEnabled();
+            // Safely handle roles - check for null or empty
+            // If user has no roles, assign CUSTOMER role as default
+            if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+                this.roles = user.getRoles().stream().map(Roles::getCode).collect(Collectors.toSet());
+            } else {
+                // Default to CUSTOMER role if no roles found
+                this.roles = new java.util.HashSet<>();
+                this.roles.add("CUSTOMER");
+            }
         }
 
         // Getters and Setters
@@ -107,6 +123,22 @@ public class AuthResponse {
 
         public void setAddress(String address) {
             this.address = address;
+        }
+
+        public Boolean getEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(Boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public Set<String> getRoles() {
+            return roles;
+        }
+
+        public void setRoles(Set<String> roles) {
+            this.roles = roles;
         }
     }
 }

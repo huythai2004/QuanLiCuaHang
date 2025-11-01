@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -11,16 +14,16 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(name = "username", unique = true, nullable = false, length = 50)
     private String username;
-    
+
     @Column(name = "full_name", length = 150)
     private String fullName;
-    
+
     @Column(name = "email", unique = true, nullable = false, length = 120)
     private String email;
-    
+
     @Column(name = "phone", length = 30)
     private String phone;
 
@@ -29,13 +32,21 @@ public class User {
 
     @Column(name = "password", nullable = false, length = 255)
     private String password;
-    
+
     @Column(name = "enabled", nullable = false)
     private Boolean enabled;
     // auto set time
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Roles> roles = new HashSet<>();
 
     public User() {
     }
@@ -124,5 +135,13 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Set<Roles> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Roles> roles) {
+        this.roles = roles;
     }
 }
