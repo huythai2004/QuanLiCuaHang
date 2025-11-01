@@ -39,7 +39,7 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(new AuthResponse(false, "Email không được để trống!", null));
             }
 
-            if (request.getPassword() == null || request.getPassword().matches(passwordRegex)) {
+            if (request.getPassword() == null || !request.getPassword().matches(passwordRegex)) {
                 return ResponseEntity.badRequest().body(new AuthResponse(false, "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và kí tự đặc biệt!", null));
             }
 
@@ -72,15 +72,22 @@ public class AuthController {
 
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                AuthResponse.UserDTO userDTO = new AuthResponse.UserDTO(user);
-
-                return ResponseEntity.ok(new AuthResponse(true, "Đăng nhập thành công!", userDTO));
+                try {
+                    AuthResponse.UserDTO userDTO = new AuthResponse.UserDTO(user);
+                    return ResponseEntity.ok(new AuthResponse(true, "Đăng nhập thành công!", userDTO));
+                } catch (Exception e) {
+                    // Log the error for debugging
+                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AuthResponse(false, "Lỗi khi xử lý thông tin người dùng: " + e.getMessage(), null));
+                }
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(false, "Bạn đã điền sai email/số điện thoại hoặc mật khẩu, vui lòng nhập lại!", null));
             }
 
 
         } catch (Exception e) {
+            // Log the error for debugging
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AuthResponse(false, "Lỗi hệ thống: " + e.getMessage(), null));
         }
     }

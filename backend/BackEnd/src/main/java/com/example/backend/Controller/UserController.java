@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -45,5 +47,33 @@ public class UserController {
     public String delete(@PathVariable Long id) {
         userService.deleteById(id);
         return "DELETE ID: " + id;
+    }
+
+    // Update user roles (Admin only)
+    @PutMapping("/{id}/roles")
+    public ResponseEntity<?> updateUserRoles(
+            @PathVariable Long id,
+            @RequestBody Map<String, Set<String>> request) {
+        try {
+            Set<String> roles = request.get("roles");
+            if (roles == null || roles.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "Vai trò không được để trống"
+                ));
+            }
+            
+            User updatedUser = userService.updateUserRoles(id, roles);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Cập nhật vai trò thành công",
+                    "user", updatedUser
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Lỗi khi cập nhật vai trò: " + e.getMessage()
+            ));
+        }
     }
 }
