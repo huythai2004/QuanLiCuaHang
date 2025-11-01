@@ -96,7 +96,7 @@ export default function Footer() {
                   class="input1 bg-none plh1 stext-107 cl7"
                   type="text"
                   name="email"
-                  placeholder="thaiphhe186421@fpt.edu.vn"
+                  placeholder="thaiphamhuy3@gmail.com"
                 />
                 <div class="focus-input1 trans-04"></div>
               </div>
