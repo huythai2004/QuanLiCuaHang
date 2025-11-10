@@ -188,6 +188,21 @@ create table password_reset_token (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- 11) Contact_Message
+CREATE TABLE contact_message (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NULL, -- có thể null nếu là khách chưa đăng nhập
+  full_name VARCHAR(100) NOT NULL,
+  email VARCHAR(120) NOT NULL,
+  subject VARCHAR(200),
+  message TEXT NOT NULL,
+  sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(20) DEFAULT 'NEW',
+  CONSTRAINT fk_contact_user FOREIGN KEY (user_id) REFERENCES users(id)
+    ON DELETE SET NULL ON UPDATE CASCADE
+);
+
 -- Indexes hỗ trợ truy vấn (bổ sung ngoài UNIQUE/PK)
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_products_category_id ON products(category_id);

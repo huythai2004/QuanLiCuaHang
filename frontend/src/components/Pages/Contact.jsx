@@ -1,17 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import "../../css/main.css";
 import "../../css/util.css";
 import Email from "../../images/icons/icon-email.png";
 import Images from "../../images/bg-01.jpg";
 
 export default function Contact() {
+  const { currentUser } = useAuth();
   const [formData, setFormData] = useState({
+    fullName: "",
     email: "",
+    subject: "",
     message: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Pre-fill form if user is logged in
+  useEffect(() => {
+    if (currentUser) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: currentUser.fullName || "",
+        email: currentUser.email || "",
+      }));
+    }
+  }, [currentUser]);
 
   const handleChange = (e) => {
     setFormData({
@@ -29,8 +44,20 @@ export default function Contact() {
     setLoading(true);
 
     // Validation
+    if (!formData.fullName || formData.fullName.trim().length < 2) {
+      setError("Vui lòng nhập họ tên hợp lệ!");
+      setLoading(false);
+      return;
+    }
+
     if (!formData.email || !formData.email.includes("@")) {
       setError("Vui lòng nhập email hợp lệ!");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.subject || formData.subject.trim().length < 3) {
+      setError("Vui lòng nhập tiêu đề (ít nhất 3 ký tự)!");
       setLoading(false);
       return;
     }
@@ -42,14 +69,17 @@ export default function Contact() {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/contact/send", {
+      const response = await fetch("http://localhost:8080/contact/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: formData.email,
+          fullName: formData.fullName.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject.trim(),
           message: formData.message.trim(),
+          userId: currentUser?.id || null,
         }),
       });
 
@@ -59,7 +89,9 @@ export default function Contact() {
         setSuccess(data.message || "Tin nhắn của bạn đã được gửi thành công!");
         // Reset form
         setFormData({
-          email: "",
+          fullName: currentUser?.fullName || "",
+          email: currentUser?.email || "",
+          subject: "",
           message: "",
         });
       } else {
@@ -128,6 +160,19 @@ export default function Contact() {
                 )}
 
                 <form onSubmit={handleSubmit}>
+                  <div className="bor8 m-b-20">
+                    <input
+                      className="stext-111 cl2 plh3 size-116 p-lr-28 p-r-30"
+                      type="text"
+                      name="fullName"
+                      placeholder="Your Full Name"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      required
+                      minLength="2"
+                    />
+                  </div>
+
                   <div className="bor8 m-b-20 how-pos4-parent">
                     <input
                       className="stext-111 cl2 plh3 size-116 p-l-62 p-r-30"
@@ -142,6 +187,19 @@ export default function Contact() {
                       className="how-pos4 pointer-none"
                       src={Email}
                       alt="ICON"
+                    />
+                  </div>
+
+                  <div className="bor8 m-b-20">
+                    <input
+                      className="stext-111 cl2 plh3 size-116 p-lr-28 p-r-30"
+                      type="text"
+                      name="subject"
+                      placeholder="Subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      required
+                      minLength="3"
                     />
                   </div>
 
@@ -207,7 +265,7 @@ export default function Contact() {
                   <span className="mtext-110 cl2">Lets Talk</span>
 
                   <p className="stext-115 cl1 size-213 p-t-18">
-                    +1 800 1236879
+                    +09 012 1236879
                   </p>
                 </div>
               </div>

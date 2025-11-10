@@ -282,7 +282,7 @@ const UserProfile = () => {
                           style={{
                             width: "120px",
                             height: "45px",
-                            backgroundColor: "#29e8efff",
+                            backgroundColor: "#296befff",
                             border: "1px solid #e6e6e6",
                             fontSize: "15px",
                             fontWeight: "600",
@@ -297,7 +297,7 @@ const UserProfile = () => {
                           style={{
                             width: "120px",
                             height: "45px",
-                            backgroundColor: "#e64a1aff",
+                            backgroundColor: "red",
                             border: "none",
                             fontSize: "15px",
                             fontWeight: "600",
