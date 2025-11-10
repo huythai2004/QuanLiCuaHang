@@ -237,7 +237,7 @@ export default function Slider() {
                     data-delay="1600"
                   >
                     <a
-                      href="product.html"
+                      href="/products"
                       className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04"
                     >
                       Shop Now
@@ -284,7 +284,7 @@ export default function Slider() {
                     data-delay="1600"
                   >
                     <a
-                      href="product.html"
+                      href="/products"
                       className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04"
                     >
                       Shop Now
@@ -331,7 +331,7 @@ export default function Slider() {
                     data-delay="1600"
                   >
                     <a
-                      href="product.html"
+                      href="/products"
                       className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04"
                     >
                       Shop Now

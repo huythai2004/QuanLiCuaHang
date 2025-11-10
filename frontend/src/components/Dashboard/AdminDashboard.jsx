@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import ProductCRUD from "./ProductCRUD";
 import UserCRUD from "./UserCRUD";
+import AdminFeedback from "./AdminFeedback";
 import "../../css/main.css";
 import "../../css/util.css";
 import "../../vendor/bootstrap/css/bootstrap.min.css";
@@ -17,10 +18,12 @@ const AdminDashboard = () => {
     totalRevenue: 0,
     totalUsers: 0,
     totalProducts: 0,
+    totalContacts: 0,
   });
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -89,6 +92,20 @@ const AdminDashboard = () => {
         }
       } catch (error) {
         console.error("Error fetching products:", error);
+      }
+
+      // Fetch Contact count
+      try {
+        const contactResponse = await fetch("http://localhost:8080/contact/messages");
+        const contactData = await contactResponse.json();
+        if (Array.isArray(contactData)) {
+          setStats((prev) => ({
+            ...prev,
+            totalContacts: contactData.length,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching contact:", error);
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -179,7 +196,6 @@ const AdminDashboard = () => {
     } else if (activeTab === "users") {
       fetchUsers();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   return (
@@ -571,7 +587,7 @@ const AdminDashboard = () => {
                               >
                                 {formatCurrency(order.total)}
                               </td>
-                              <td>
+                              <td>  
                                 <select
                                   value={order.status}
                                   onChange={(e) =>
@@ -637,17 +653,7 @@ const AdminDashboard = () => {
             )}
 
             {/* Feedback Tab */}
-            {activeTab === "feedback" && (
-              <div>
-                <h2 className="mtext-109 cl2 p-b-30">Phản hồi khách hàng</h2>
-                <div className="bor10 p-all-50 text-center bg-white">
-                  <i className="fa fa-comments fa-5x cl6 m-b-20"></i>
-                  <p className="stext-111 cl6">
-                    Phản hồi khách hàng - Chức năng đang phát triển
-                  </p>
-                </div>
-              </div>
-            )}
+            {activeTab === "feedback" && <AdminFeedback />}
           </div>
         </div>
       </div>
