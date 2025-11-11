@@ -5,7 +5,7 @@
 ## Công nghệ chính
 
 - **Backend**
-  - Java 17, Spring Boot.
+  - Java 21, Spring Boot.
   - Spring Web, Spring Data JPA (Hibernate), Spring Validation.
   - Spring Security với BCrypt password encoder (Authentication & Authorization).
   - MySQL làm hệ quản trị CSDL.
