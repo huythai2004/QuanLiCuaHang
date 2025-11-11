@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import '../../css/main.css';
-import '../../css/util.css';
-import '../../vendor/bootstrap/css/bootstrap.min.css';
-import '../../fonts/font-awesome-4.7.0/css/font-awesome.min.css';
+import React, { useState, useEffect } from "react";
+import "../../css/main.css";
+import "../../css/util.css";
+import "../../vendor/bootstrap/css/bootstrap.min.css";
+import "../../fonts/font-awesome-4.7.0/css/font-awesome.min.css";
 
 const VNPayPaymentPage = () => {
   const [orderData, setOrderData] = useState(null);
-  const [paymentStatus, setPaymentStatus] = useState('pending'); // pending, processing, success, failed
+  const [paymentStatus, setPaymentStatus] = useState("pending"); // pending, processing, success, failed
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Lấy thông tin đơn hàng từ backend
-  useEffect(() => {                          
+  useEffect(() => {
     const fetchOrderData = async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const orderId = urlParams.get('orderId');
-      
+      const orderId = urlParams.get("orderId");
+
       if (!orderId) {
-        setError('Không tìm thấy thông tin đơn hàng');
+        setError("Không tìm thấy thông tin đơn hàng");
         return;
       }
 
@@ -29,99 +29,103 @@ const VNPayPaymentPage = () => {
           setOrderData({
             orderId: data.orderId,
             customerName: data.customerName,
-            orderDate: new Date(data.orderDate).toLocaleDateString('vi-VN'),
+            orderDate: new Date(data.orderDate).toLocaleDateString("vi-VN"),
             total: data.total,
-            items: data.items.map(item => ({
+            items: data.items.map((item) => ({
               name: item.productName,
               quantity: item.quantity,
               price: item.unitPrice,
-              image: item.productImage
+              image: item.productImage,
             })),
             shippingAddress: data.shippingAddress,
-            status: data.status
+            status: data.status,
           });
         } else {
-          setError('Không tìm thấy đơn hàng');
+          setError("Không tìm thấy đơn hàng");
         }
       } catch (err) {
-        console.error('Error fetching order:', err);
-        setError('Lỗi khi tải thông tin đơn hàng');
+        console.error("Error fetching order:", err);
+        setError("Lỗi khi tải thông tin đơn hàng");
       }
     };
 
     // Kiểm tra nếu đang return từ VNPay
     checkPaymentReturn();
-    
+
     // Fetch order data nếu chưa có payment return
     const urlParams = new URLSearchParams(window.location.search);
-    if (!urlParams.get('vnp_ResponseCode')) {
+    if (!urlParams.get("vnp_ResponseCode")) {
       fetchOrderData();
     }
   }, []);
 
   const checkPaymentReturn = () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const vnp_ResponseCode = urlParams.get('vnp_ResponseCode');
-    
+    const vnp_ResponseCode = urlParams.get("vnp_ResponseCode");
+
     if (vnp_ResponseCode) {
-      if (vnp_ResponseCode === '00') {
-        setPaymentStatus('success');
+      if (vnp_ResponseCode === "00") {
+        setPaymentStatus("success");
       } else {
-        setPaymentStatus('failed');
-        setError('Thanh toán thất bại. Mã lỗi: ' + vnp_ResponseCode);
+        setPaymentStatus("failed");
+        setError("Thanh toán thất bại. Mã lỗi: " + vnp_ResponseCode);
       }
     }
   };
 
   const handlePayment = async () => {
     if (!orderData) return;
-    
+
     setLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
-      // Gọi API để tạo payment URL
+      // Xác nhận thanh toán (COD/hậu thanh toán) phía backend
       const response = await fetch(
-        `http://localhost:8080/payment/vnpay?orderId=${orderData.orderId}&amount=${orderData.total}`,
+        `http://localhost:8080/payment/confirm?orderId=${orderData.orderId}&method=COD`,
         {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          }
+          method: "POST",
         }
       );
 
-      if (!response.ok) {
-        throw new Error('Không thể tạo liên kết thanh toán');
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Không thể xác nhận thanh toán");
       }
 
-      const paymentUrl = await response.text();
-      
-      // Chuyển hướng đến trang thanh toán VNPay
-      window.location.href = paymentUrl;
-      
+      // Thông báo và điều hướng
+      alert("Bạn đã thanh toán đơn hàng thành công");
+      window.location.href = "/";
+      // Sau khi FE chuyển về trang chủ, user có thể xem mục đơn hàng tại /profile
     } catch (err) {
-      setError(err.message || 'Đã có lỗi xảy ra');
+      setError(err.message || "Đã có lỗi xảy ra");
       setLoading(false);
     }
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(amount);
   };
 
-  if (paymentStatus === 'success') {
+  if (paymentStatus === "success") {
     return (
-      <div className="container" style={{ paddingTop: '100px', paddingBottom: '100px' }}>
+      <div
+        className="container"
+        style={{ paddingTop: "100px", paddingBottom: "100px" }}
+      >
         <div className="row justify-content-center">
           <div className="col-md-6">
             <div className="card shadow-lg border-0">
               <div className="card-body text-center p-5">
                 <div className="mb-4">
-                  <i className="fa fa-check-circle" style={{ fontSize: '80px', color: '#28a745' }}></i>
+                  <i
+                    className="fa fa-check-circle"
+                    style={{ fontSize: "80px", color: "#28a745" }}
+                  ></i>
                 </div>
                 <h2 className="mtext-111 cl2 mb-3">Thanh toán thành công!</h2>
                 <p className="stext-111 cl6 mb-4">
@@ -129,22 +133,22 @@ const VNPayPaymentPage = () => {
                 </p>
                 <div className="bg-light rounded p-4 mb-4">
                   <p className="stext-111 cl6 mb-2">Số tiền đã thanh toán</p>
-                  <h3 className="mtext-110" style={{ color: '#28a745' }}>
+                  <h3 className="mtext-110" style={{ color: "#28a745" }}>
                     {formatCurrency(orderData?.total || 0)}
                   </h3>
                 </div>
                 <button
-                  onClick={() => window.location.href = '/my-orders'}
+                  onClick={() => (window.location.href = "/my-orders")}
                   className="btn btn-success btn-lg btn-block mb-2"
-                  style={{ borderRadius: '25px' }}
+                  style={{ borderRadius: "25px" }}
                 >
                   <i className="fa fa-list-alt mr-2"></i>
                   Xem đơn hàng của tôi
                 </button>
                 <button
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => (window.location.href = "/")}
                   className="btn btn-outline-secondary btn-lg btn-block"
-                  style={{ borderRadius: '25px' }}
+                  style={{ borderRadius: "25px" }}
                 >
                   <i className="fa fa-home mr-2"></i>
                   Về trang chủ
@@ -157,22 +161,28 @@ const VNPayPaymentPage = () => {
     );
   }
 
-  if (paymentStatus === 'failed') {
+  if (paymentStatus === "failed") {
     return (
-      <div className="container" style={{ paddingTop: '100px', paddingBottom: '100px' }}>
+      <div
+        className="container"
+        style={{ paddingTop: "100px", paddingBottom: "100px" }}
+      >
         <div className="row justify-content-center">
           <div className="col-md-6">
             <div className="card shadow-lg border-0">
               <div className="card-body text-center p-5">
                 <div className="mb-4">
-                  <i className="fa fa-times-circle" style={{ fontSize: '80px', color: '#dc3545' }}></i>
+                  <i
+                    className="fa fa-times-circle"
+                    style={{ fontSize: "80px", color: "#dc3545" }}
+                  ></i>
                 </div>
                 <h2 className="mtext-111 cl2 mb-3">Thanh toán thất bại</h2>
                 <p className="stext-111 cl6 mb-4">{error}</p>
                 <button
-                  onClick={() => setPaymentStatus('pending')}
+                  onClick={() => setPaymentStatus("pending")}
                   className="btn btn-danger btn-lg btn-block"
-                  style={{ borderRadius: '25px' }}
+                  style={{ borderRadius: "25px" }}
                 >
                   <i className="fa fa-refresh mr-2"></i>
                   Thử lại
@@ -187,8 +197,11 @@ const VNPayPaymentPage = () => {
 
   if (!orderData) {
     return (
-      <div className="container text-center" style={{ paddingTop: '100px' }}>
-        <i className="fa fa-spinner fa-spin fa-3x" style={{ color: '#6c7ae0' }}></i>
+      <div className="container text-center" style={{ paddingTop: "100px" }}>
+        <i
+          className="fa fa-spinner fa-spin fa-3x"
+          style={{ color: "#6c7ae0" }}
+        ></i>
         <p className="mt-3 stext-111 cl6">Đang tải...</p>
       </div>
     );
@@ -201,11 +214,17 @@ const VNPayPaymentPage = () => {
         <div className="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
           <a
             href="/"
-            onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = "/";
+            }}
             className="stext-109 cl8 hov-cl1 trans-04"
           >
             Trang Chủ
-            <i className="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+            <i
+              className="fa fa-angle-right m-l-9 m-r-10"
+              aria-hidden="true"
+            ></i>
           </a>
           <span className="stext-109 cl4">Thanh toán</span>
         </div>
@@ -229,15 +248,19 @@ const VNPayPaymentPage = () => {
                   <i className="fa fa-info-circle m-r-10"></i>
                   Thông tin đơn hàng
                 </h3>
-                
+
                 <div className="row">
                   <div className="col-sm-6 p-b-10">
                     <span className="stext-111 cl6">Mã đơn hàng:</span>
-                    <span className="stext-110 cl2 m-l-10">#{orderData.orderId}</span>
+                    <span className="stext-110 cl2 m-l-10">
+                      #{orderData.orderId}
+                    </span>
                   </div>
                   <div className="col-sm-6 p-b-10">
                     <span className="stext-111 cl6">Khách hàng:</span>
-                    <span className="stext-110 cl2 m-l-10">{orderData.customerName}</span>
+                    <span className="stext-110 cl2 m-l-10">
+                      {orderData.customerName}
+                    </span>
                   </div>
                   <div className="col-sm-6 p-b-10">
                     <span className="stext-111 cl6">Ngày đặt:</span>
@@ -264,22 +287,30 @@ const VNPayPaymentPage = () => {
                 </h3>
                 <div className="wrap-table-shopping-cart">
                   {orderData.items.map((item, index) => (
-                    <div key={index} className="table_row p-b-15" style={{ borderBottom: '1px solid #e6e6e6' }}>
+                    <div
+                      key={index}
+                      className="table_row p-b-15"
+                      style={{ borderBottom: "1px solid #e6e6e6" }}
+                    >
                       <div className="flex-w flex-sb-m p-b-10">
                         <div className="flex-w flex-m">
                           {item.image && (
-                            <div className="wrap-pic-w size-200 bor10 of-hidden m-r-15" style={{ width: '80px', height: '80px' }}>
+                            <div
+                              className="wrap-pic-w size-200 bor10 of-hidden m-r-15"
+                              style={{ width: "80px", height: "80px" }}
+                            >
                               <img src={item.image} alt={item.name} />
                             </div>
                           )}
                           <div>
                             <p className="stext-110 cl2 p-b-5">{item.name}</p>
                             <p className="stext-111 cl6">
-                              Số lượng: {item.quantity} × {formatCurrency(item.price)}
+                              Số lượng: {item.quantity} ×{" "}
+                              {formatCurrency(item.price)}
                             </p>
                           </div>
                         </div>
-                        <p className="stext-110" style={{ color: '#e65540' }}>
+                        <p className="stext-110" style={{ color: "#e65540" }}>
                           {formatCurrency(item.price * item.quantity)}
                         </p>
                       </div>
@@ -304,7 +335,7 @@ const VNPayPaymentPage = () => {
                   <span className="stext-110 cl2">Tạm tính:</span>
                 </div>
                 <div className="size-209">
-                  <span className="mtext-110" style={{ color: '#e65540' }}>
+                  <span className="mtext-110" style={{ color: "#e65540" }}>
                     {formatCurrency(orderData.total)}
                   </span>
                 </div>
@@ -320,7 +351,7 @@ const VNPayPaymentPage = () => {
                     Miễn phí vận chuyển cho đơn hàng
                   </p>
                   <div className="p-t-15">
-                    <span className="mtext-110" style={{ color: '#28a745' }}>
+                    <span className="mtext-110" style={{ color: "#28a745" }}>
                       Miễn phí
                     </span>
                   </div>
@@ -333,7 +364,14 @@ const VNPayPaymentPage = () => {
                   <span className="mtext-101 cl2">Tổng cộng:</span>
                 </div>
                 <div className="size-209 p-t-1">
-                  <span className="mtext-110" style={{ color: '#e65540', fontWeight: 'bold', fontSize: '28px' }}>
+                  <span
+                    className="mtext-110"
+                    style={{
+                      color: "#e65540",
+                      fontWeight: "bold",
+                      fontSize: "28px",
+                    }}
+                  >
                     {formatCurrency(orderData.total)}
                   </span>
                 </div>
@@ -352,11 +390,11 @@ const VNPayPaymentPage = () => {
                 onClick={handlePayment}
                 disabled={loading}
                 className="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
-                style={{ 
-                  height: '60px',
-                  fontSize: '16px',
+                style={{
+                  height: "60px",
+                  fontSize: "16px",
                   opacity: loading ? 0.6 : 1,
-                  cursor: loading ? 'not-allowed' : 'pointer'
+                  cursor: loading ? "not-allowed" : "pointer",
                 }}
               >
                 {loading ? (
@@ -366,8 +404,8 @@ const VNPayPaymentPage = () => {
                   </>
                 ) : (
                   <>
-                    <i className="fa fa-credit-card m-r-10"></i>
-                    Thanh toán qua VNPay
+                    <i className="fa fa-check m-r-10"></i>
+                    Xác nhận thanh toán
                   </>
                 )}
               </button>
@@ -375,12 +413,8 @@ const VNPayPaymentPage = () => {
               {/* Security Note */}
               <div className="text-center p-t-20">
                 <p className="stext-111 cl6">
-                  <i className="fa fa-lock m-r-5"></i>
-                  Bạn sẽ được chuyển đến trang thanh toán VNPay an toàn
-                </p>
-                <p className="stext-111 cl6 p-t-10">
-                  <i className="fa fa-shield m-r-5"></i>
-                  Giao dịch được mã hóa và bảo mật
+                  Sau khi xác nhận, đơn hàng của bạn sẽ xuất hiện trong mục Đơn
+                  hàng của tôi tại trang Profile.
                 </p>
               </div>
             </div>
