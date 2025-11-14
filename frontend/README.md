@@ -4,20 +4,22 @@
 
 ## Tính năng
 
-- ✅ Đăng nhập người dùng
-- ✅ Đăng ký tài khoản mới
-- ✅ Giao diện responsive với Bootstrap
-- ✅ Chuyển đổi giữa các form đăng nhập/đăng ký
-- ✅ Validation form cơ bản
+- Đăng nhập người dùng
+- Đăng ký tài khoản mới
+- Giao diện responsive với Bootstrap
+- Chuyển đổi giữa các form đăng nhập/đăng ký
+- Validation form cơ bản
 
 ## Cài đặt
 
 1. Cài đặt dependencies:
+
 ```bash
 npm install
 ```
 
 2. Chạy ứng dụng:
+
 ```bash
 npm start
 ```
@@ -46,10 +48,12 @@ public/
 ## Sử dụng
 
 ### Đăng nhập
+
 - Email: `admin@example.com`
 - Password: `123456`
 
 ### Đăng ký
+
 - Điền đầy đủ thông tin trong form đăng ký
 - Mật khẩu xác nhận phải khớp với mật khẩu
 
